@@ -68,7 +68,7 @@ class Login extends Component {
   render(){
 
     if(cookies.get('loggedIn') == 'true' || this.state.goToEditPage){
-      return(<Redirect to="/plan" /> );
+      return(<Redirect to="/math" /> );
     }
     if(this.state.goToCreateAccount){
       return(<Redirect to="/create-account" /> );

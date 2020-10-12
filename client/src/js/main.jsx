@@ -6,7 +6,7 @@ const wrapper = document.getElementById("container");
 
 ReactDOM.render(
         <div>
-          <LMath url="localhost"/>
+          <LMath url="http://127.0.0.1:7772"/>
         </div>
 , wrapper);
 

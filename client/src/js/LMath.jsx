@@ -35,7 +35,7 @@ class LMath extends Component {
             Welcome to LMath
           </Route>
           <Route path="/">
-            <Redirect to="/login" />
+            <Redirect to="/math" />
           </Route>
 
 
@@ -49,4 +49,4 @@ class LMath extends Component {
 
 }
 
-export default NowPlan;
+export default LMath;

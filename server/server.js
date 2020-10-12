@@ -14,18 +14,18 @@ let auth = require("./auth.json");
 let usersCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:"+ auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 
-// MongoClient.connect(uri, function(err, dbtemp) {
-//   if(err){
-//     console.log(err);
-//   }
-//   var dbo = dbtemp.db("NowPlan");
+MongoClient.connect(uri, function(err, dbtemp) {
+  if(err){
+    console.log(err);
+  }
+  var dbo = dbtemp.db("LMath");
 
-//   db = dbo;
-//   dbo.createCollection("users", function(err, res) {
-//   }); 
-//   usersCollection = dbo.collection("users");
-//   mongoSetUpDone();
-// });
+  db = dbo;
+  dbo.createCollection("users", function(err, res) {
+  }); 
+  usersCollection = dbo.collection("users");
+  mongoSetUpDone();
+});
 
 function mongoSetUpDone(){
 
@@ -103,14 +103,6 @@ function mongoSetUpDone(){
   });
 
 
-
-  
-
-  
-
-
-
- 
    app.post('/userExists', (req, res) => {
     req.body.id = req.body.id.toLowerCase();
     res.setHeader('Content-Type', 'application/json');
