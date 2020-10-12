@@ -1,0 +1,116 @@
+.account-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height:100vh;
+}
+@media(max-width:768px){
+  .account-wrapper{
+    margin-top:10vh;
+  }
+}
+.login-button{
+  margin: 20px;
+}
+
+
+.list-viewer{
+  /* width: 100vw; */
+}
+
+.side-menu-list{
+  /* width:30%; */
+  padding-right: 0px !important;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+
+}
+
+body{
+  scrollbar-color:#375a7f  #303030 ; /* first vertical then the peice */
+  scrollbar-width: auto;
+
+
+}
+/* This is for chrome */
+::-webkit-scrollbar{ 
+  background-color: #303030;
+  width: 15px;
+}
+
+::-webkit-scrollbar-track-piece  {
+  height: 1px;
+  background-color:  #303030 /* alos blue */;
+}
+::-webkit-scrollbar-thumb:vertical {
+  background-color: #375a7f; /* the vertical*/
+}
+
+.plan-list-item-name{
+  width: 100%;
+}
+.form-check.plan-list-completed-checkbox{
+  margin-right:10px;
+
+}
+.plan-list-completed-checkbox > input{
+  width: 2em;
+  height: 2em;
+  margin-right: 0px;
+}
+.plan-list-item{
+  display: inline;
+  width:100%;
+  display:flex;
+  background: #444444;
+  margin: 10px 0px;
+  padding: 10px;
+  border: 1px solid transparent;
+
+}
+.plan-list-item:hover{
+  border-width: 0.25px;
+  border-style: solid;
+  border-color: white;
+  cursor: move;
+}
+.plan-list{
+  /*width:70%;*/
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+
+}
+.editable-text-normal{
+  padding: 2px;
+  padding-left: 5px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+
+}
+.editable-text-normal:hover{
+  color: #b4f1ff;
+  background-color: #404040;
+  border-radius: 9px;
+
+}
+
+.list-title{
+  display: inline-block;
+}
+.list-body{
+    /* background-color: #222222; */
+    /* border-top: 1px solid black; */
+}
+
+.list-item-remove-button-:hover {
+  background-color: #4e4e4e;
+  border: solid 1px #a7a7a7;
+}
