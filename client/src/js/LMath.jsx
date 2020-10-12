@@ -21,7 +21,7 @@ class LMath extends Component {
 
   render(){
     return (
-      <Container fluid>
+      <Container >
 
       <HashRouter>
         <Switch>

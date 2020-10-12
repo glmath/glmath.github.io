@@ -3,6 +3,7 @@ import { Container } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactMarkdown from "react-markdown"
 import Editor from "rich-markdown-editor";
+import { MathfieldComponent } from "react-mathlive";
 
 
 class Lesson extends Component {
@@ -10,16 +11,30 @@ class Lesson extends Component {
   constructor(props) {
     super();
     this.state = {
-      raw_content: "testing"
+      raw_content: "testing",
+      isView: false,
+      last_save_timeout: "",
     };
+  }
+  editorOnChange = (value) =>{
+    clearTimeout(this.state.last_save_timeout);
+    let newTimeout = setTimeout(() => this.saveToServer(value()), 1000);
+    this.setState({last_save_timeout: newTimeout})
+  }
+
+  saveToServer = (value) =>{
+    console.log(value);
   }
 
   render() {
     return (
       <div>
         Lesson Page
+        <button onClick={() => { this.setState({isView : !this.state.isView})}}>Toggle View</button>
         <Editor className="editor"
-          defaultValue="Hello world!"
+          defaultValue=""
+          readOnly={this.state.isView}
+          onChange={this.editorOnChange}
 
           embeds={[
             {
@@ -39,7 +54,25 @@ class Lesson extends Component {
               },
               component: YoutubeEmbed,
             },
+            {
+              title: "Math (Latex)",
+              keywords: "math latex math",
+              icon: () => (
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/75/YouTube_social_white_squircle_%282017%29.svg"
+                  width={24}
+                  height={24}
+                />
+              ),
+              matcher: url => {
+                return url.match(
+                  /(\$+)(?:(?!\1)[\s\S])*\1/i
+                );
+              },
+              component: MathEmbed,
+            },
           ]}
+          dark
         />
         {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}
         {/* <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} /> */}
@@ -63,6 +96,9 @@ function LessonViewer(props) {
   </div>)
 }
 
+
+function MathLiveEditor(props){
+}
 function LessonEditor(props) {
 
   return (<div>
@@ -87,6 +123,26 @@ class YoutubeEmbed extends React.Component {
         className={this.props.isSelected ? "ProseMirror-selectednode" : ""}
         src={`https://www.youtube.com/embed/${videoId}?modestbranding=1`}
       />
+    );
+  }
+}
+
+class MathEmbed extends React.Component {
+  render() {
+    const { attrs } = this.props;
+    const latex = attrs.matches[0];
+    <MathfieldComponent
+    initialLatex="f(x)=\\log _10 x"
+    onChange={this.onMathChange}
+  />
+    return (
+      <div> 
+        <MathfieldComponent
+        initialLatex="f(x)=\\log _10 x"
+        onChange={(value) => {}}
+      /> 
+        
+        </div>
     );
   }
 }
