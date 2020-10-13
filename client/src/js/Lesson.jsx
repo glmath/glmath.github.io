@@ -120,7 +120,7 @@ class Lesson extends Component {
             }}
             onChange={this.editorOnChange}
           /> :
-          <div dangerouslySetInnerHTML={{ __html: this.state.raw_content }} />
+          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.raw_content }} />
         }
 
         {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}

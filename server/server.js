@@ -140,7 +140,7 @@ function mongoSetUpDone(){
 
     if(lessonsCollection.findOne({_id: req.params.id}, (err, lesson) => {
       if(err || lesson == undefined || lesson == null){
-        res.statusCode(404).send({});
+        res.status(404).send({});
         console.log("Trying to post to lesson not even made!");
         return;
       }

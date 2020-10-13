@@ -77,3 +77,7 @@ tr{
 .se-wrapper-inner.se-wrapper-wysiwyg.sun-editor-editable {
   height: 100% !important;
 }
+.sun-editor-editable {
+  color: #fff !important;
+  background-color: #222 !important;
+}
