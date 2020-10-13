@@ -1,4 +1,5 @@
 var path = require('path') // this is so we have path so we can set the output path
+
 module.exports = {
 
         entry: {
