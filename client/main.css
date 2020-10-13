@@ -69,3 +69,11 @@ body{
 .kvOJSo{
   /* background-color: #fff0 !important; */
 }
+tr{
+  border: solid white 0px;
+}
+
+/* this is to override a syle that came with the react plugin, which was inline :(  */
+.se-wrapper-inner.se-wrapper-wysiwyg.sun-editor-editable {
+  height: 100% !important;
+}
