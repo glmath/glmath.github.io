@@ -2,20 +2,37 @@ import React, { Component } from "react";
 import { Container } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactMarkdown from "react-markdown"
-
+import SunEditor from 'suneditor-react';
+import katex from "katex";
+import 'suneditor/dist/css/suneditor.min.css'; // Import Sun Editor's CSS File
+import 'katex/dist/katex.min.css'
 
 class Lesson extends Component {
 
   constructor(props) {
+    console.log(props.id);
     super();
     this.state = {
-      raw_content: "testing",
+      raw_content: "",
+      isView: false,
+      starting_value: "",
+      last_save_timeout: "",
     };
   }
-  editorOnChange = (value) =>{
+  editorOnChange = (value) => {
+    clearTimeout(this.state.last_save_timeout);
+    let timeout = setTimeout(() => {
+      this.saveToServer(value);
+    }, 250);;
+
+    this.setState({
+      raw_content: value,
+      last_save_timeout: timeout,
+    });
+
   }
 
-  saveToServer = (value) =>{
+  saveToServer = (value) => {
     console.log(value);
   }
 
@@ -23,15 +40,59 @@ class Lesson extends Component {
     return (
       <div>
         lesson page
-        {/* <button onClick={() => { this.setState({isView : !this.state.isView})}}>Toggle View</button> */}
-        <LessonViewer raw_content={this.state.raw_content}></LessonViewer>
-        <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} />
+        <button onClick={() => { 
+          this.setState({
+            isView : !this.state.isView,
+            starting_value: this.state.raw_content,
+          })}
+          
+          
+          }>Toggle View</button>
+        {this.state.isView ? 
+        <SunEditor 
+        setContents={this.state.starting_value}
+        
+        setOptions={{
+          height: 200,
+          katex: { // Custom option
+            src: katex,
+            options: {
+                /** default options **
+                * throwOnError: false,
+                */
+               maxSize:4
+            }
+          },
+          
+          buttonList: [
+            ['undo', 'redo'],
+            ['font', 'fontSize', 'formatBlock'],
+            // ['paragraphStyle', 'blockquote'],
+            ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+            // ['fontColor', 'highliteColor', 'textStyle'],
+            ['removeFormat'],
+            ['outdent', 'indent'],
+            ['align', 'horizontalRule', 'list', 'lineHeight'],
+            ['table', 'link', 'image', 'video', 'math'], // You must add the 'katex' library at options to use the 'math' plugin.
+            // ['imageGallery'], // You must add the "imageGalleryUrl".
+            // ['fullScreen', 'showBlocks', 'codeView'],
+            ['preview', 'print'],
+            // ['save', 'template'], 
+          ],
+        }}
+        onChange={this.editorOnChange}
+         /> :
+         <div dangerouslySetInnerHTML={{ __html: this.state.raw_content}} /> 
+         }
+
+        {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}
+        {/* <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} /> */}
       </div>
     );
   }
 
-  set_new_value = (newValue) =>{
-    this.setState({editor_value: newValue});
+  set_new_value = (newValue) => {
+    this.setState({ editor_value: newValue });
   }
 
   rawContentSet = (newContent) => {
@@ -39,6 +100,7 @@ class Lesson extends Component {
   }
 
 }
+
 
 function LessonViewer(props) {
   return (<div >
@@ -51,7 +113,7 @@ function LessonViewer(props) {
 }
 
 
-function MathLiveEditor(props){
+function MathLiveEditor(props) {
 }
 function LessonEditor(props) {
 
