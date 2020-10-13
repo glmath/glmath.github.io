@@ -6,6 +6,7 @@ import {
   Route,
   Link,
   Redirect,
+  useParams,
 } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -13,6 +14,7 @@ import Login from "./Login.jsx";
 import CreateAccount from "./CreateAccount.jsx";
 
 import Lesson from "./Lesson.jsx"
+import LessonBrowser from "./LessonBrowser.jsx"
 class LMath extends Component {
 
   constructor(props){
@@ -32,11 +34,14 @@ class LMath extends Component {
           <Route path="/create-account">
             <CreateAccount url={this.props.url}/>
           </Route>
-          <Route path="/math">
-            <Lesson></Lesson>
+          <Route path="/math/:id" children={ <LessonLoader url={this.props.url} /> }></Route>
+
+          <Route path="/browser">
+            <LessonBrowser url={this.props.url} />
           </Route>
+
           <Route path="/">
-            <Redirect to="/math" />
+            <Redirect to="/browser" />
           </Route>
 
 
@@ -48,6 +53,16 @@ class LMath extends Component {
     );
   }
 
+}
+
+function LessonLoader(props){
+  let { id } = useParams();
+
+  return (
+    <div>
+      <Lesson id={id} url={props.url}/>
+    </div>
+  );
 }
 
 export default LMath;

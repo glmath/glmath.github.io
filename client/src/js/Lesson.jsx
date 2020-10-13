@@ -10,15 +10,18 @@ import 'katex/dist/katex.min.css'
 class Lesson extends Component {
 
   constructor(props) {
-    console.log(props.id);
-    super();
+    super(props);
+
     this.state = {
       raw_content: "",
       isView: false,
       starting_value: "",
       last_save_timeout: "",
     };
+    console.log(props.id);
+    this.getFromServer();
   }
+
   editorOnChange = (value) => {
     clearTimeout(this.state.last_save_timeout);
     let timeout = setTimeout(() => {
@@ -33,57 +36,92 @@ class Lesson extends Component {
   }
 
   saveToServer = (value) => {
+    fetch(this.props.url + "/post/lesson/" + this.props.id, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: this.props.id,
+        lesson: {
+          id: this.props.id,
+          content: value
+        },
+      })
+    })
     console.log(value);
+  }
+
+  getFromServer = () => {
+    console.log(this.props);
+    fetch(this.props.url + "/get/lesson/" + this.props.id, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then(response => response.json())
+      .then(data => {
+        this.setState({ 
+          starting_value: data.lesson.content ,
+          raw_content: data.lesson.content,
+        });
+        console.log(data);
+      });
+
+
   }
 
   render() {
     return (
       <div>
         lesson page
-        <button onClick={() => { 
+        <button onClick={() => {
           this.setState({
-            isView : !this.state.isView,
+            isView: !this.state.isView,
             starting_value: this.state.raw_content,
-          })}
-          
-          
-          }>Toggle View</button>
-        {this.state.isView ? 
-        <SunEditor 
-        setContents={this.state.starting_value}
-        
-        setOptions={{
-          height: 200,
-          katex: { // Custom option
-            src: katex,
-            options: {
-                /** default options **
-                * throwOnError: false,
-                */
-               maxSize:4
-            }
-          },
-          
-          buttonList: [
-            ['undo', 'redo'],
-            ['font', 'fontSize', 'formatBlock'],
-            // ['paragraphStyle', 'blockquote'],
-            ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-            // ['fontColor', 'highliteColor', 'textStyle'],
-            ['removeFormat'],
-            ['outdent', 'indent'],
-            ['align', 'horizontalRule', 'list', 'lineHeight'],
-            ['table', 'link', 'image', 'video', 'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-            // ['imageGallery'], // You must add the "imageGalleryUrl".
-            // ['fullScreen', 'showBlocks', 'codeView'],
-            ['preview', 'print'],
-            // ['save', 'template'], 
-          ],
-        }}
-        onChange={this.editorOnChange}
-         /> :
-         <div dangerouslySetInnerHTML={{ __html: this.state.raw_content}} /> 
-         }
+          })
+        }
+
+
+        }>Toggle View</button>
+        {this.state.isView ?
+          <SunEditor
+            setContents={this.state.starting_value}
+
+            setOptions={{
+              height: 200,
+              katex: { // Custom option
+                src: katex,
+                options: {
+                  /** default options **
+                  * throwOnError: false,
+                  */
+                  maxSize: 4
+                }
+              },
+
+              buttonList: [
+                ['undo', 'redo'],
+                ['font', 'fontSize', 'formatBlock'],
+                // ['paragraphStyle', 'blockquote'],
+                ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+                // ['fontColor', 'highliteColor', 'textStyle'],
+                ['removeFormat'],
+                ['outdent', 'indent'],
+                ['align', 'horizontalRule', 'list', 'lineHeight'],
+                ['table', 'link', 'image', 'video', 'math'], // You must add the 'katex' library at options to use the 'math' plugin.
+                // ['imageGallery'], // You must add the "imageGalleryUrl".
+                // ['fullScreen', 'showBlocks', 'codeView'],
+                ['preview', 'print'],
+                // ['save', 'template'], 
+              ],
+            }}
+            onChange={this.editorOnChange}
+          /> :
+          <div dangerouslySetInnerHTML={{ __html: this.state.raw_content }} />
+        }
 
         {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}
         {/* <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} /> */}
