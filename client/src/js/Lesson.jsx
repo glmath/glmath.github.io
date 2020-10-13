@@ -12,14 +12,9 @@ class Lesson extends Component {
     super();
     this.state = {
       raw_content: "testing",
-      isView: false,
-      last_save_timeout: "",
     };
   }
   editorOnChange = (value) =>{
-    clearTimeout(this.state.last_save_timeout);
-    let newTimeout = setTimeout(() => this.saveToServer(value()), 1000);
-    this.setState({last_save_timeout: newTimeout})
   }
 
   saveToServer = (value) =>{
@@ -29,55 +24,16 @@ class Lesson extends Component {
   render() {
     return (
       <div>
-        Lesson Page
-        <button onClick={() => { this.setState({isView : !this.state.isView})}}>Toggle View</button>
-        <Editor className="editor"
-          defaultValue=""
-          readOnly={this.state.isView}
-          onChange={this.editorOnChange}
-
-          embeds={[
-            {
-              title: "YouTube",
-              keywords: "youtube video tube google",
-              icon: () => (
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/75/YouTube_social_white_squircle_%282017%29.svg"
-                  width={24}
-                  height={24}
-                />
-              ),
-              matcher: url => {
-                return url.match(
-                  /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([a-zA-Z0-9_-]{11})$/i
-                );
-              },
-              component: YoutubeEmbed,
-            },
-            {
-              title: "Math (Latex)",
-              keywords: "math latex math",
-              icon: () => (
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/75/YouTube_social_white_squircle_%282017%29.svg"
-                  width={24}
-                  height={24}
-                />
-              ),
-              matcher: url => {
-                return url.match(
-                  /(\$+)(?:(?!\1)[\s\S])*\1/i
-                );
-              },
-              component: MathEmbed,
-            },
-          ]}
-          dark
-        />
+        lesson page
+        {/* <button onClick={() => { this.setState({isView : !this.state.isView})}}>Toggle View</button> */}
         {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}
         {/* <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} /> */}
       </div>
     );
+  }
+
+  set_new_value = (newValue) =>{
+    this.setState({editor_value: newValue});
   }
 
   rawContentSet = (newContent) => {
@@ -127,19 +83,26 @@ class YoutubeEmbed extends React.Component {
   }
 }
 
+
+// basically the math acts as a sort of a fake link
 class MathEmbed extends React.Component {
   render() {
+    console.log(this.props);
     const { attrs } = this.props;
-    const latex = attrs.matches[0];
-    <MathfieldComponent
-    initialLatex="f(x)=\\log _10 x"
-    onChange={this.onMathChange}
-  />
+    const latex = attrs.href; // workaround since href actually stores the latex
+    let oldValue = attrs.matches.old_value;
+    console.log(latex);
     return (
       <div> 
+        
         <MathfieldComponent
-        initialLatex="f(x)=\\log _10 x"
-        onChange={(value) => {}}
+        initialLatex={latex}
+        onChange={(value) => {
+          let news = oldValue.replace(this.props.href, latex);
+          console.log(news);
+          attrs.matches.set_new_value(news);
+          
+        }} 
       /> 
         
         </div>

@@ -1,14 +1,14 @@
 var path = require('path') // this is so we have path so we can set the output path
 module.exports = {
 
-        entry:{
+        entry: {
                 main: "./client/src/js/main.jsx",
         },
-        output:{
-                filename:"bundle.js",
+        output: {
+                filename: "bundle.js",
                 path: path.join(__dirname, "./client"),
         },
-        mode:"development",
+        mode: "development",
         module: {
                 rules: [
                         {
@@ -28,7 +28,12 @@ module.exports = {
                                 options: {
                                         limit: 10000
                                 }
+                        },
+                        {
+                                test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+                                loader: 'url-loader?limit=100000'
                         }
+
                 ]
         }
 };
