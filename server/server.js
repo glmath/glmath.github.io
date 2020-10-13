@@ -12,6 +12,7 @@ var cookieParser = require('cookie-parser')
 let auth = require("./auth.json");
 
 let usersCollection = null;
+let lessonsCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:"+ auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 
 MongoClient.connect(uri, function(err, dbtemp) {
@@ -24,11 +25,12 @@ MongoClient.connect(uri, function(err, dbtemp) {
   dbo.createCollection("users", function(err, res) {
   }); 
   usersCollection = dbo.collection("users");
+  lessonsCollection = dbo.collection("lessons");
+
   mongoSetUpDone();
 });
 
 function mongoSetUpDone(){
-
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(cookieParser());
   app.use(express.urlencoded()); // to support URL-encoded bodiesk
@@ -36,7 +38,7 @@ function mongoSetUpDone(){
   app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', 'https://127.0.0.1');
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -129,6 +131,81 @@ function mongoSetUpDone(){
       console.log("removed user" + req.body.id);
       res.send(JSON.stringify({}));
     });
+  });
+
+
+
+  app.post('/post/lesson/:id', (req, res) => {
+    let id = req.body.id;
+
+    if(lessonsCollection.findOne({_id: req.params.id}, (err, lesson) => {
+      if(err || lesson == undefined || lesson == null){
+        res.statusCode(404).send({});
+        console.log("Trying to post to lesson not even made!");
+        return;
+      }
+
+    }));
+    lessonsCollection.updateOne({_id: req.body.id}, {$set: {lesson: req.body.lesson}}, {upsert: true});
+
+    res.send(JSON.stringify({
+      status: "success",
+    }));
+
+  });
+
+  app.post("/post/create/lesson/:id", (req, res) => {
+    let newLesson = req.body.lesson;
+    let parentId = req.body.parentId;
+
+    if(!newLesson || !parentId){
+      res.status(500).send({});
+      return;
+    }
+    
+    lessonsCollection.insertOne({id: newLesson.id}, newLesson);
+
+
+
+    lessonsCollection.findOne({id:parentId}, (err, lesson) => {
+      let children = lesson.children;
+      children[newLesson.id] = { 
+        id: newLesson.id,
+        name: newLesson.name,
+        children: newLesson.children
+      };
+
+    });
+
+
+
+
+  });
+
+
+  app.get('/get/lesson/:id/', (req, res) => {
+    lessonsCollection.findOne({_id: req.params.id}, (err, lesson) => {
+      if(err || lesson == null || lesson == undefined){
+        res.status(404).send(JSON.stringify({}));
+        return;
+      }
+
+      res.send(JSON.stringify(lesson));
+    });
+  });
+
+  app.get('/get/lesson-tree/:id', (req, res) => {
+    let tree = [{
+      id: "root",
+      name: "Math",
+      children:[],
+    }];
+
+    lessonsCollection.findOne({id: "root"}, (err, root) => {
+      res.send(JSON.stringify(root));
+    });
+
+
   });
 
   app.use('/', express.static('client'))
