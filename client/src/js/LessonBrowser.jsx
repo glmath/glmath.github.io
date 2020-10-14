@@ -15,6 +15,7 @@ class LessonBrowser extends Component {
     super(props);
 
     this.state = {
+        newLessonInput: "",
     };
   }
 
@@ -36,12 +37,27 @@ class LessonBrowser extends Component {
       });
   }
 
+
+
+  createNewLesson = () => {
+      let lessonName = this.state.newLessonInput;
+      // create lesson id using time and name
+      let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
+      console.log(lessonId)
+
+  }
+
   render(){
       return (
           <div>
                 Lesson Browser
                 <div className="lesson-links">
-                    <Link to="/math/one">To One</Link>
+                    {/* <Link to="/math/one">To One</Link> */}
+                    <input type="text" 
+                       value={this.state.newLessonInput} 
+                       onChange={(e) => this.setState({newLessonInput: e.target.value})}/>
+                    <button onClick={this.createNewLesson}> create </button>
+
                 </div>
 
           </div>

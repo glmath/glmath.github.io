@@ -157,11 +157,11 @@ function mongoSetUpDone() {
         });
 
         // add to new parent
-        lessonsCollection.findOne({ _id: req.body.lesson.parentId}, (err, newParentLesson) => {
+        lessonsCollection.findOne({ _id: req.body.lesson.parentId }, (err, newParentLesson) => {
           let children = newParentLesson.children;
           children.push(req.body.lesson.id);
 
-          lessonsCollection.updateOne({ _id: newParentLesson.id}, { $set: { children: children } }, { upsert: true });
+          lessonsCollection.updateOne({ _id: newParentLesson.id }, { $set: { children: children } }, { upsert: true });
         });
       }
     }));
@@ -235,18 +235,58 @@ function mongoSetUpDone() {
   });
 
   app.get('/get/lesson-tree/:id', (req, res) => {
-    let tree = [{
-      id: "root",
-      name: "Math",
-      children: [],
-    }];
-
-    lessonsCollection.findOne({ _id: "root" }, (err, root) => {
-      res.send(JSON.stringify(root));
+    createLessonTree("root", (tree) => {
+      res.send(JSON.stringify(tree));
     });
-
 
   });
 
-  app.use('/', express.static('client'))
+  async function findLessonFromDatabase(id) {
+    const lesson = await lessonsCollection.findOne({ _id: id })
+    return lesson
+  }
+
+  async function createLessonTree(id, callback) {
+    let root = await findLessonFromDatabase(id);
+    // console.log(root);
+
+    let tree = {
+      id: root.id,
+      name: "Math",
+      children: root.children,
+    };
+
+    let queue = [];
+    queue.push(tree);
+
+    // Do breadth first search to create a tree with all the children in a compact form of name, id, and children. 
+    // it is slightly confusing since the children end up being used as a placeholder for the next layers id's
+    while(queue.length > 0){
+      numberInLayer = queue.length;
+      for(let k =0; k< numberInLayer; k++){
+        let newRoot = queue.shift();
+
+        let childrenIds = newRoot.children;
+        newRoot.children = [];
+
+        for (let i = 0; i < childrenIds.length; i++) {
+          let lesId = childrenIds[i];
+
+          let lesson = await findLessonFromDatabase(lesId);
+          let compact = {id: lesson.id, name: lesson.name, children: lesson.children}; // the lesson.children is just a placeholder used in the next round
+
+          newRoot.children.push(compact); // we add it here to fix it later
+          queue.push(compact);
+
+        }
+      }
+    }
+
+
+    callback(tree);
+
+
+    app.use('/', express.static('client'))
+  }
+
 }
