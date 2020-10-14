@@ -13,41 +13,39 @@ class Lesson extends Component {
     super(props);
 
     this.state = {
-      raw_content: "",
+      serverLesson:{},
+      rawContent: "",
       isView: false,
-      starting_value: "",
-      last_save_timeout: "",
+      startingValue: "",
+      lastSaveTimeout: "",
     };
     console.log(props.id);
     this.getFromServer();
   }
 
   editorOnChange = (value) => {
-    clearTimeout(this.state.last_save_timeout);
+    clearTimeout(this.state.lastSaveTimeout);
     let timeout = setTimeout(() => {
       this.saveToServer(value);
-    }, 250);;
+    }, 250);
 
     this.setState({
-      raw_content: value,
-      last_save_timeout: timeout,
+      rawContent: value,
+      lastSaveTimeout: timeout,
     });
 
   }
 
   saveToServer = (value) => {
-    fetch(this.props.url + "/post/lesson/" + this.props.id, {
+    fetch(this.props.url + "/post/lesson/", {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id: this.props.id,
-        lesson: {
           id: this.props.id,
-          content: value
-        },
+          content: value,
       })
     })
     console.log(value);
@@ -64,23 +62,22 @@ class Lesson extends Component {
     }).then(response => response.json())
       .then(data => {
         this.setState({ 
-          starting_value: data.lesson.content ,
-          raw_content: data.lesson.content,
+          serverLesson: data,
+          startingValue: data.content,
+          rawContent: data.content,
         });
-        console.log(data);
       });
-
-
   }
+
+
 
   render() {
     return (
       <div>
-        lesson pagee
         <button onClick={() => {
           this.setState({
             isView: !this.state.isView,
-            starting_value: this.state.raw_content,
+            starting_valustartingValuee: this.state.rawContent,
           })
         }
 
@@ -88,7 +85,7 @@ class Lesson extends Component {
         }>Toggle View</button>
         {this.state.isView ?
           <SunEditor
-            setContents={this.state.starting_value}
+            setContents={this.state.startingValue}
 
             setOptions={{
               height: 200,
@@ -120,10 +117,10 @@ class Lesson extends Component {
             }}
             onChange={this.editorOnChange}
           /> :
-          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.raw_content }} />
+          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.rawContent }} />
         }
-        {/* <LessonViewer raw_content={this.state.raw_content}></LessonViewer> */}
-        {/* <LessonEditor raw_content_set={this.rawContentSet} raw_content={this.state.raw_content} /> */}
+        {/* <LessonViewer rawContent={this.state.rawContent}></LessonViewer> */}
+        {/* <LessonEditor rawContent_set={this.rawContentSet} rawContent={this.state.rawContent} /> */}
 
       </div>
     );
@@ -134,7 +131,7 @@ class Lesson extends Component {
   }
 
   rawContentSet = (newContent) => {
-    this.setState({ raw_content: newContent });
+    this.setState({ rawContent: newContent });
   }
 
 }
@@ -143,8 +140,8 @@ class Lesson extends Component {
 function LessonViewer(props) {
   return (<div >
     <div className="lesson-viewer">
-      {props.raw_content}
-      <ReactMarkdown source={props.raw_content} />
+      {props.rawContent}
+      <ReactMarkdown source={props.rawContent} />
     </div>
 
   </div>)
@@ -157,9 +154,9 @@ function LessonEditor(props) {
 
   return (<div>
     <textarea
-      onChange={(e) => props.raw_content_set(e.target.value)}
+      onChange={(e) => props.rawContent_set(e.target.value)}
       type="textarea"
-      value={props.raw_content}
+      value={props.rawContent}
       className="lesson-editor"
     />
   </div>)

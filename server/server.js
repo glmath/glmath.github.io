@@ -136,7 +136,7 @@ function mongoSetUpDone() {
 
 
   app.post('/post/lesson/', (req, res) => {
-    let id = req.body.lesson.id;
+    let id = req.body.id;
 
     if (lessonsCollection.findOne({ _id: id }, (err, lesson) => {
       if (err || lesson == undefined || lesson == null) {
@@ -146,27 +146,27 @@ function mongoSetUpDone() {
       }
 
       // check if the parent id changed, if so tell the parent that its no longer a child
-      if (lesson.parentId != req.body.lesson.parentId && req.body.lesson.parentId != undefined) {
+      if (lesson.parentId != req.body.parentId && req.body.parentId != undefined) {
         // remove from old parent
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
           let children = oldParentLesson.children;
-          var index = children.indexOf(req.body.lesson.id);
+          var index = children.indexOf(req.body.id);
           children.splice(index, 1);
 
           lessonsCollection.updateOne({ _id: lesson.parentId }, { $set: { children: children } }, { upsert: true });
         });
 
         // add to new parent
-        lessonsCollection.findOne({ _id: req.body.lesson.parentId }, (err, newParentLesson) => {
+        lessonsCollection.findOne({ _id: req.body.parentId }, (err, newParentLesson) => {
           let children = newParentLesson.children;
-          children.push(req.body.lesson.id);
+          children.push(req.body.id);
 
           lessonsCollection.updateOne({ _id: newParentLesson.id }, { $set: { children: children } }, { upsert: true });
         });
       }
     }));
 
-    lessonsCollection.updateOne({ _id: id }, { $set: req.body.lesson }, { upsert: true });
+    lessonsCollection.updateOne({ _id: id }, { $set: req.body }, { upsert: true });
 
     res.send(JSON.stringify({
       status: "success",
@@ -175,8 +175,8 @@ function mongoSetUpDone() {
   });
 
   app.post("/post/create/lesson/", (req, res) => {
-    let newLesson = req.body.lesson;
-    let parentId = req.body.lesson.parentId;
+    let newLesson = req.body;
+    let parentId = req.body.parentId;
     if (!newLesson || !parentId || newLesson.id == "" || newLesson.id == undefined || newLesson.id == null) {
       console.log("ERROR NO LESSON OR PARENT ID");
     }
