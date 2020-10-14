@@ -20,7 +20,7 @@ class LMath extends Component {
   constructor(props){
     super(props);
     this.state = {
-      isAdmin: true,
+      isAdmin: false,
     }
   }
 
