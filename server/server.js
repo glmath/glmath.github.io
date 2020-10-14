@@ -46,7 +46,7 @@ function mongoSetUpDone() {
 
     // Website you wish to allow to connect
     if (req.headers.origin == undefined) {
-      res.setHeader('Access-Control-Allow-Origin', "http://127.0.0.1");
+      res.setHeader('Access-Control-Allow-Origin', "http://127.0.0.1:7772");
     } else {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     }
@@ -291,7 +291,7 @@ function mongoSetUpDone() {
     });
   });
 
-  app.get('/get/lesson-tree/:id', (req, res) => {
+  app.get('/get/lesson-tree/:id/', (req, res) => {
     if (!shouldRecalculateTree) {
       res.send(JSON.stringify(cachedLessonTree));
       return;
