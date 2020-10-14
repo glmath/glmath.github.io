@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container, Spinner, Button, ButtonGroup } from "react-bootstrap";
+import { Container, Spinner, Button, ButtonGroup, Modal } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactMarkdown from "react-markdown"
 import SunEditor from 'suneditor-react';
@@ -25,6 +25,7 @@ class Lesson extends Component {
       isView: false, // whetor we should show an editor or not
       startingValue: "", // the starting value of the editor, for when converting between the two
       lastSaveTimeout: "", // used to keep track of the last save
+      showingUploadModal: false,
     };
 
     // update with inital data from the server
@@ -70,6 +71,8 @@ class Lesson extends Component {
   }
 
   saveToGithub = () => {
+    this.setState({showingUploadModal: true});
+
     fetch(this.props.url + "/post/lesson-to-github/", {
       method: 'POST',
       headers: {
@@ -78,7 +81,7 @@ class Lesson extends Component {
       },
       body: JSON.stringify({
         id: this.props.id,
-        content: value,
+        content: this.state.serverLesson.content,
       })
     })
   }
@@ -147,6 +150,9 @@ class Lesson extends Component {
         <LessonName name={this.state.serverLesson.name} />
 
 
+        <UploadToServerModal 
+        isShowing={this.state.showingUploadModal} 
+        close={() => this.setState({showingUploadModal: false})}/>
 
         <Link to={"../browser"}>
           <Button variant="dark" >Back</Button>
@@ -249,5 +255,24 @@ function LessonEditor(props) {
 
 
 
+function UploadToServerModal(props){
+
+  const handleClose = () => props.close();
+
+  return (
+      <Modal show={props.isShowing} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Published to everyone!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>This lesson has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+  );
+}
 
 export default Lesson;

@@ -188,7 +188,7 @@ function mongoSetUpDone() {
   app.post("/post/lesson-to-github/", (req, res) => {
     let id = req.body.id;
 
-    fs.writeFile(__dirname +  "/../client/lessons/" + id , JSON.stringify(req.body), function(err) {
+    fs.writeFile(__dirname +  "/../client/lessons/" + id + ".json", JSON.stringify(req.body), function(err) {
         if(err) {
             return console.log(err);
         }

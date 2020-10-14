@@ -32,6 +32,7 @@ class LMath extends Component {
           this.setState({
             isAdmin: !this.state.isAdmin,
           })
+          // window.location.reload(); 
         }
         }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
 
