@@ -84,7 +84,7 @@ class Lesson extends Component {
   // }
 
   getFromServer = () => {
-    let url = this.props.clientUrl + "/lessons/" + "testlesson.json";
+    let url = this.props.clientUrl + "/lessons/" + this.props.id + ".json";
 
     fetch(url,{
       // headers: {
