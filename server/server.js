@@ -284,9 +284,7 @@ function mongoSetUpDone() {
 
 
     callback(tree);
-
-
-    app.use('/', express.static('client'))
   }
 
+  app.use('/', express.static('client'))
 }
