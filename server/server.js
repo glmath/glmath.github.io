@@ -146,7 +146,7 @@ function mongoSetUpDone() {
       }
 
       // check if the parent id changed, if so tell the parent that its no longer a child
-      if (lesson.parentId != req.body.lesson.parentId) {
+      if (lesson.parentId != req.body.lesson.parentId && req.body.lesson.parentId != undefined) {
         // remove from old parent
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
           let children = oldParentLesson.children;
