@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Spinner} from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactMarkdown from "react-markdown"
 import SunEditor from 'suneditor-react';
@@ -13,8 +13,7 @@ class Lesson extends Component {
     super(props);
 
     this.state = {
-      serverLesson:{},
-      rawContent: "",
+      serverLesson: null,
       isView: false,
       startingValue: "",
       lastSaveTimeout: "",
@@ -29,8 +28,11 @@ class Lesson extends Component {
       this.saveToServer(value);
     }, 250);
 
+    let lesson = this.state.serverLesson;
+    lesson.content = value;
+
     this.setState({
-      rawContent: value,
+      serverLesson: lesson,
       lastSaveTimeout: timeout,
     });
 
@@ -44,8 +46,8 @@ class Lesson extends Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-          id: this.props.id,
-          content: value,
+        id: this.props.id,
+        content: value,
       })
     })
     console.log(value);
@@ -61,10 +63,9 @@ class Lesson extends Component {
       },
     }).then(response => response.json())
       .then(data => {
-        this.setState({ 
+        this.setState({
           serverLesson: data,
           startingValue: data.content,
-          rawContent: data.content,
         });
       });
   }
@@ -72,12 +73,23 @@ class Lesson extends Component {
 
 
   render() {
+    if (this.state.serverLesson == null) {
+      return (
+        <Spinner className="spinner" animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      );
+    }
+
     return (
       <div>
+        <LessonName name={this.state.serverLesson.name} />
+
+
         <button onClick={() => {
           this.setState({
             isView: !this.state.isView,
-            starting_valustartingValuee: this.state.rawContent,
+            startingValue: this.state.serverLesson.content,
           })
         }
 
@@ -112,12 +124,12 @@ class Lesson extends Component {
                 // ['imageGallery'], // You must add the "imageGalleryUrl".
                 ['fullScreen', 'showBlocks', 'codeView'],
                 ['preview', 'print'],
-                ['save', 'template'], 
+                ['save', 'template'],
               ],
             }}
             onChange={this.editorOnChange}
           /> :
-          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.rawContent }} />
+          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.serverLesson.content }} />
         }
         {/* <LessonViewer rawContent={this.state.rawContent}></LessonViewer> */}
         {/* <LessonEditor rawContent_set={this.rawContentSet} rawContent={this.state.rawContent} /> */}
@@ -126,13 +138,7 @@ class Lesson extends Component {
     );
   }
 
-  set_new_value = (newValue) => {
-    this.setState({ editor_value: newValue });
-  }
-
-  rawContentSet = (newContent) => {
-    this.setState({ rawContent: newContent });
-  }
+ 
 
 }
 
@@ -148,8 +154,10 @@ function LessonViewer(props) {
 }
 
 
-function MathLiveEditor(props) {
+function LessonName(props) {
+  return <h1> {props.name} </h1>
 }
+
 function LessonEditor(props) {
 
   return (<div>

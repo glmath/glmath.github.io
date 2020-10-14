@@ -81,3 +81,14 @@ tr{
   color: #fff !important;
   background-color: #222 !important;
 }
+
+li {
+  border: 1px solid;
+  padding: 10px;
+  list-style: none;
+}
+
+div.spinner{
+  width: 50em;
+  height: 50em;
+}

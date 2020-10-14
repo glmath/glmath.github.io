@@ -15,6 +15,10 @@ let usersCollection = null;
 let lessonsCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 
+// since creating a lesson tree is expensive, memonize it to optimize
+let cachedLessonTree = {};
+let shouldRecalculateTree = true; // if we moved something or renamed we should recalulate tree
+
 MongoClient.connect(uri, function (err, dbtemp) {
   if (err) {
     console.log(err);
@@ -147,6 +151,8 @@ function mongoSetUpDone() {
 
       // check if the parent id changed, if so tell the parent that its no longer a child
       if (lesson.parentId != req.body.parentId && req.body.parentId != undefined) {
+        shouldRecalculateTree = true;
+
         // remove from old parent
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
           let children = oldParentLesson.children;
@@ -207,18 +213,13 @@ function mongoSetUpDone() {
       let children = lesson.children;
       children.push(newLesson.id);
 
-      // children[newLesson.id] = { 
-      //   id: newLesson.id,
-      //   name: newLesson.name,
-      //   children: newLesson.children
-      // };
       lessonsCollection.updateOne({ _id: parentId }, { $set: { children: children } }, { upsert: true });
       res.send({ status: "success" });
 
     });
+    
 
-
-
+    shouldRecalculateTree = true;
 
   });
 
@@ -235,9 +236,14 @@ function mongoSetUpDone() {
   });
 
   app.get('/get/lesson-tree/:id', (req, res) => {
-    createLessonTree("root", (tree) => {
-      res.send(JSON.stringify(tree));
-    });
+    if(!shouldRecalculateTree){
+        res.send(JSON.stringify(cachedLessonTree));
+        return;
+    }else{
+      createLessonTree("root", (tree) => {
+        res.send(JSON.stringify(tree));
+      });
+    }
 
   });
 
@@ -283,6 +289,8 @@ function mongoSetUpDone() {
     }
 
 
+    cachedLessonTree = tree;
+    shouldRecalculateTree = false;
     callback(tree);
   }
 

@@ -46,6 +46,23 @@ class LessonBrowser extends Component {
         let lessonName = this.state.newLessonInput;
         // create lesson id using time and name
         let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
+        fetch(this.props.url + "/post/create/lesson/", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: lessonId,
+                name: lessonName,
+                content: "",
+                parentId: "root",
+                children: [],
+            })
+        }).then(() => {
+            this.refreshLessonsFromServer();
+        });
+
     }
 
 
@@ -62,13 +79,11 @@ class LessonBrowser extends Component {
                 this.setState({
                     lessonTree: data,
                 })
-
             });
 
     }
 
     render() {
-        console.log(this.state.lessonTree);
         // let tree = <div></div>;
         // let stack = [];
         // stack.push(this.state.lessonTree);
@@ -77,7 +92,6 @@ class LessonBrowser extends Component {
         //     let lesson = stack.pop();
         // }
 
-        console.log(this.state.lessonTree);
         return (
             <div>
                 Lesson Browser
@@ -107,7 +121,6 @@ function LessonListing(props) {
 
             <ul>
                 {props.lesson.children.map(child => {
-                    console.log(child);
                     return (<LessonListing key={child.id} lesson={child} />);
                 })}
             </ul>
