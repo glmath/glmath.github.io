@@ -14,6 +14,7 @@ let auth = require("./auth.json");
 let usersCollection = null;
 let lessonsCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
+const fs = require('fs');
 
 // since creating a lesson tree is expensive, memonize it to optimize
 let cachedLessonTree = {};
@@ -184,6 +185,21 @@ function mongoSetUpDone() {
 
   });
 
+  app.post("/post/lesson-to-github/", (req, res) => {
+    let id = req.body.id;
+
+    fs.writeFile(__dirname +  "/../client/lessons/" + id , JSON.stringify(req.body), function(err) {
+        if(err) {
+            return console.log(err);
+        }
+        console.log("The file was saved!");
+    }); 
+
+    res.send(JSON.stringify({
+      status: "success",
+    }));
+  });
+
   app.post("/post/create/lesson/", (req, res) => {
     let newLesson = req.body;
     let parentId = req.body.parentId;
@@ -222,6 +238,8 @@ function mongoSetUpDone() {
 
     });
     
+
+
 
     shouldRecalculateTree = true;
 

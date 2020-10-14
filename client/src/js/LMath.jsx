@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Container} from "react-bootstrap";
+import {Container, Button} from "react-bootstrap";
 import {
   HashRouter,
   Switch,
@@ -19,11 +19,21 @@ class LMath extends Component {
 
   constructor(props){
     super(props);
+    this.state = {
+      isAdmin: true,
+    }
   }
 
   render(){
     return (
       <Container >
+
+        <Button variant="dark" onClick={() => {
+          this.setState({
+            isAdmin: !this.state.isAdmin,
+          })
+        }
+        }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
 
       <HashRouter>
         <Switch>
@@ -34,7 +44,7 @@ class LMath extends Component {
           <Route path="/create-account">
             <CreateAccount url={this.props.url}/>
           </Route>
-          <Route path="/math/:id" children={ <LessonLoader url={this.props.url} clientUrl={this.props.clientUrl}/> }></Route>
+          <Route path="/math/:id" children={ <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl}/> }></Route>
 
           <Route path="/browser">
             <LessonBrowser url={this.props.url} />
@@ -60,7 +70,7 @@ function LessonLoader(props){
 
   return (
     <div>
-      <Lesson id={id} url={props.url} clientUrl={props.clientUrl}/>
+      <Lesson id={id} url={props.url}  isAdmin={props.isAdmin} clientUrl={props.clientUrl}/>
     </div>
   );
 }

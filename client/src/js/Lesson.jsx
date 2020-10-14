@@ -28,7 +28,11 @@ class Lesson extends Component {
     };
 
     // update with inital data from the server
-    this.getFromServer();
+    if (this.props.isAdmin) {
+      this.getFromServer();
+    } else {
+      this.getFromGithub();
+    }
   }
 
   editorOnChange = (value) => {
@@ -65,28 +69,42 @@ class Lesson extends Component {
     })
   }
 
-  // Old way of getting from database
-  // getFromServer = () => {
-  //   console.log(this.props);
-  //   fetch(this.props.url + "/get/lesson/" + this.props.id, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Accept': 'application/json',
-  //       'Content-Type': 'application/json',
-  //     },
-  //   }).then(response => response.json())
-  //     .then(data => {
-  //       this.setState({
-  //         serverLesson: data,
-  //         startingValue: data.content,
-  //       });
-  //     });
-  // }
+  saveToGithub = () => {
+    fetch(this.props.url + "/post/lesson-to-github/", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: this.props.id,
+        content: value,
+      })
+    })
+  }
 
+  // Old way of getting from database
   getFromServer = () => {
+    console.log(this.props);
+    fetch(this.props.url + "/get/lesson/" + this.props.id, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }).then(response => response.json())
+      .then(data => {
+        this.setState({
+          serverLesson: data,
+          startingValue: data.content,
+        });
+      });
+  }
+
+  getFromGithub = () => {
     let url = this.props.clientUrl + "/lessons/" + this.props.id + ".json";
 
-    fetch(url,{
+    fetch(url, {
       // headers: {
       //   "pragma": "no-cache",
       //   'Cache-Control': 'no-cache'
@@ -129,9 +147,19 @@ class Lesson extends Component {
         <LessonName name={this.state.serverLesson.name} />
 
 
+
         <Link to={"../browser"}>
           <Button variant="dark" >Back</Button>
         </Link>
+
+
+
+        {this.props.isAdmin ?<div>
+        <Button variant="dark" onClick={() => {
+          this.saveToGithub();
+        }
+        }>Publish To Everyone</Button>
+
 
         <Button variant="dark" onClick={() => {
           this.setState({
@@ -139,7 +167,7 @@ class Lesson extends Component {
             startingValue: this.state.serverLesson.content,
           })
         }
-        }>Toggle View</Button>
+        }>Toggle Edit</Button> </div> : ""}
 
 
         {this.state.isView ?
