@@ -13,24 +13,24 @@ let auth = require("./auth.json");
 
 let usersCollection = null;
 let lessonsCollection = null;
-let uri = "mongodb+srv://nedaChatAdmin:"+ auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
+let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 
-MongoClient.connect(uri, function(err, dbtemp) {
-  if(err){
+MongoClient.connect(uri, function (err, dbtemp) {
+  if (err) {
     console.log(err);
   }
   var dbo = dbtemp.db("LMath");
 
   db = dbo;
-  dbo.createCollection("users", function(err, res) {
-  }); 
+  dbo.createCollection("users", function (err, res) {
+  });
   usersCollection = dbo.collection("users");
   lessonsCollection = dbo.collection("lessons");
 
   mongoSetUpDone();
 });
 
-function mongoSetUpDone(){
+function mongoSetUpDone() {
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(cookieParser());
   app.use(express.urlencoded()); // to support URL-encoded bodiesk
@@ -53,7 +53,7 @@ function mongoSetUpDone(){
     next();
   });
 
-  app.listen(port, function(){
+  app.listen(port, function () {
     console.log("Neda Plan Server Started on port " + port);
   });
 
@@ -61,8 +61,8 @@ function mongoSetUpDone(){
     req.body.id = req.body.id.toLowerCase();
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(req.body.password, salt);
-    usersCollection.findOne({_id: req.body.id}, (err, user) =>{
-      if(user != null || user != undefined){
+    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+      if (user != null || user != undefined) {
         res.send("duplicate");
         return;
       }
@@ -81,20 +81,20 @@ function mongoSetUpDone(){
   app.post('/loginUser', (req, res) => {
     req.body.id = req.body.id.toLowerCase();
     res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({_id: req.body.id}, (err, user) =>{
-      if(user != null){
-        res.send(JSON.stringify({correctPass: bcrypt.compareSync(req.body.password, user.password)}));
-      }else{
-        res.send(JSON.stringify({correctPass: false}));
+    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+      if (user != null) {
+        res.send(JSON.stringify({ correctPass: bcrypt.compareSync(req.body.password, user.password) }));
+      } else {
+        res.send(JSON.stringify({ correctPass: false }));
       }
 
     });
   });
 
-  app.get('/getUsers', (req, res) =>{
-    usersCollection.find({}).toArray( (err, users) =>{
+  app.get('/getUsers', (req, res) => {
+    usersCollection.find({}).toArray((err, users) => {
       let usersToSend = {};
-      users.map( (user, index)=>{
+      users.map((user, index) => {
         delete users[index].password;
         usersToSend[user.id] = users[index];
       });
@@ -105,15 +105,15 @@ function mongoSetUpDone(){
   });
 
 
-   app.post('/userExists', (req, res) => {
+  app.post('/userExists', (req, res) => {
     req.body.id = req.body.id.toLowerCase();
     res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({_id: req.body.id}, (err, user) => {
-      if(user == null || user == undefined || err){
-        res.send(JSON.stringify({exists: false}));
+    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+      if (user == null || user == undefined || err) {
+        res.send(JSON.stringify({ exists: false }));
         return;
       }
-      res.send(JSON.stringify({exists: true}));
+      res.send(JSON.stringify({ exists: true }));
     });
 
   });
@@ -122,12 +122,12 @@ function mongoSetUpDone(){
     req.body.id = req.body.id.toLowerCase();
     console.log("got remove reqest");
     res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({_id: req.body.id}, (err, user) => {
-      if(user == null || user == undefined || err){
+    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+      if (user == null || user == undefined || err) {
         res.send(JSON.stringify({}));
         return;
       }
-      usersCollection.remove({_id: req.body.id});
+      usersCollection.remove({ _id: req.body.id });
       console.log("removed user" + req.body.id);
       res.send(JSON.stringify({}));
     });
@@ -135,18 +135,38 @@ function mongoSetUpDone(){
 
 
 
-  app.post('/post/lesson/:id', (req, res) => {
-    let id = req.body.id;
+  app.post('/post/lesson/', (req, res) => {
+    let id = req.body.lesson.id;
 
-    if(lessonsCollection.findOne({_id: req.params.id}, (err, lesson) => {
-      if(err || lesson == undefined || lesson == null){
-        res.status(404).send({});
+    if (lessonsCollection.findOne({ _id: id }, (err, lesson) => {
+      if (err || lesson == undefined || lesson == null) {
+        // res.status(404).send({});
         console.log("Trying to post to lesson not even made!");
         return;
       }
 
+      // check if the parent id changed, if so tell the parent that its no longer a child
+      if (lesson.parentId != req.body.lesson.parentId) {
+        // remove from old parent
+        lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
+          let children = oldParentLesson.children;
+          var index = children.indexOf(req.body.lesson.id);
+          children.splice(index, 1);
+
+          lessonsCollection.updateOne({ _id: lesson.parentId }, { $set: { children: children } }, { upsert: true });
+        });
+
+        // add to new parent
+        lessonsCollection.findOne({ _id: req.body.lesson.parentId}, (err, newParentLesson) => {
+          let children = newParentLesson.children;
+          children.push(req.body.lesson.id);
+
+          lessonsCollection.updateOne({ _id: newParentLesson.id}, { $set: { children: children } }, { upsert: true });
+        });
+      }
     }));
-    lessonsCollection.updateOne({_id: req.body.id}, {$set: {lesson: req.body.lesson}}, {upsert: true});
+
+    lessonsCollection.updateOne({ _id: id }, { $set: req.body.lesson }, { upsert: true });
 
     res.send(JSON.stringify({
       status: "success",
@@ -154,26 +174,46 @@ function mongoSetUpDone(){
 
   });
 
-  app.post("/post/create/lesson/:id", (req, res) => {
+  app.post("/post/create/lesson/", (req, res) => {
     let newLesson = req.body.lesson;
-    let parentId = req.body.parentId;
-
-    if(!newLesson || !parentId){
+    let parentId = req.body.lesson.parentId;
+    if (!newLesson || !parentId || newLesson.id == "" || newLesson.id == undefined || newLesson.id == null) {
+      console.log("ERROR NO LESSON OR PARENT ID");
+    }
+    if (!newLesson || !parentId) {
       res.status(500).send({});
       return;
     }
-    
-    lessonsCollection.insertOne({id: newLesson.id}, newLesson);
+    // TODO: Check if id already exists in database and if so return error here
+
+    newLesson["_id"] = newLesson.id;
+    lessonsCollection.insertOne(newLesson);
 
 
 
-    lessonsCollection.findOne({id:parentId}, (err, lesson) => {
+    // we need to tell the parents of this lesson that we added a new child
+    console.log(parentId);
+    lessonsCollection.findOne({ _id: parentId }, (err, lesson) => {
+      if (err || !lesson) {
+        console.log(lesson);
+        try {
+          res.send("LESSON PARENT NOT FOUND");
+        } catch {
+
+        }
+        return;
+      }
+
       let children = lesson.children;
-      children[newLesson.id] = { 
-        id: newLesson.id,
-        name: newLesson.name,
-        children: newLesson.children
-      };
+      children.push(newLesson.id);
+
+      // children[newLesson.id] = { 
+      //   id: newLesson.id,
+      //   name: newLesson.name,
+      //   children: newLesson.children
+      // };
+      lessonsCollection.updateOne({ _id: parentId }, { $set: { children: children } }, { upsert: true });
+      res.send({ status: "success" });
 
     });
 
@@ -184,8 +224,8 @@ function mongoSetUpDone(){
 
 
   app.get('/get/lesson/:id/', (req, res) => {
-    lessonsCollection.findOne({_id: req.params.id}, (err, lesson) => {
-      if(err || lesson == null || lesson == undefined){
+    lessonsCollection.findOne({ _id: req.params.id }, (err, lesson) => {
+      if (err || lesson == null || lesson == undefined) {
         res.status(404).send(JSON.stringify({}));
         return;
       }
@@ -198,10 +238,10 @@ function mongoSetUpDone(){
     let tree = [{
       id: "root",
       name: "Math",
-      children:[],
+      children: [],
     }];
 
-    lessonsCollection.findOne({id: "root"}, (err, root) => {
+    lessonsCollection.findOne({ _id: "root" }, (err, root) => {
       res.send(JSON.stringify(root));
     });
 
