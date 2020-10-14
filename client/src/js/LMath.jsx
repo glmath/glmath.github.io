@@ -34,7 +34,7 @@ class LMath extends Component {
           <Route path="/create-account">
             <CreateAccount url={this.props.url}/>
           </Route>
-          <Route path="/math/:id" children={ <LessonLoader url={this.props.url} /> }></Route>
+          <Route path="/math/:id" children={ <LessonLoader url={this.props.url} clientUrl={this.props.clientUrl}/> }></Route>
 
           <Route path="/browser">
             <LessonBrowser url={this.props.url} />
@@ -60,7 +60,7 @@ function LessonLoader(props){
 
   return (
     <div>
-      <Lesson id={id} url={props.url}/>
+      <Lesson id={id} url={props.url} clientUrl={props.clientUrl}/>
     </div>
   );
 }

@@ -42,7 +42,11 @@ function mongoSetUpDone() {
   app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'https://127.0.0.1');
+    if(req.headers.origin == undefined){
+      res.setHeader('Access-Control-Allow-Origin', "http://127.0.0.1");
+    }else{
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+    }
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');

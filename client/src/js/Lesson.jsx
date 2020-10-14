@@ -65,21 +65,45 @@ class Lesson extends Component {
     })
   }
 
+  // Old way of getting from database
+  // getFromServer = () => {
+  //   console.log(this.props);
+  //   fetch(this.props.url + "/get/lesson/" + this.props.id, {
+  //     method: 'GET',
+  //     headers: {
+  //       'Accept': 'application/json',
+  //       'Content-Type': 'application/json',
+  //     },
+  //   }).then(response => response.json())
+  //     .then(data => {
+  //       this.setState({
+  //         serverLesson: data,
+  //         startingValue: data.content,
+  //       });
+  //     });
+  // }
+
   getFromServer = () => {
-    console.log(this.props);
-    fetch(this.props.url + "/get/lesson/" + this.props.id, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then(response => response.json())
-      .then(data => {
+    let url = this.props.clientUrl + "/lessons/" + "testlesson.html";
+
+    fetch(url)
+      .then(function (response) {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Error in getting lesson.');
+      })
+      .then(function (data) {
+        console.log(data);
         this.setState({
           serverLesson: data,
-          startingValue: data.content,
+          startingValue: data,
         });
+      }.bind(this))
+      .catch(function (err) {
+        console.log("failed to load ", url, err.message);
       });
+
   }
 
 
