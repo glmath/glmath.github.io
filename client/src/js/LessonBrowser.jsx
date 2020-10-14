@@ -77,12 +77,12 @@ class LessonBrowser extends Component {
         //     let lesson = stack.pop();
         // }
 
-                console.log(this.state.lessonTree);
+        console.log(this.state.lessonTree);
         return (
             <div>
                 Lesson Browser
                 <div className="lesson-links">
-                    {<LessonListing  lesson={this.state.lessonTree} />}
+                    {<LessonListing lesson={this.state.lessonTree} />}
 
                     <input type="text"
                         value={this.state.newLessonInput}
@@ -101,11 +101,14 @@ class LessonBrowser extends Component {
 function LessonListing(props) {
     return (
         <div>
-            <li key={props.lesson.id}>{props.lesson.name}</li>
+            <Link to={"/math/" + props.lesson.id}>
+                <li key={props.lesson.id}>{props.lesson.name}</li>
+            </Link>
+
             <ul>
                 {props.lesson.children.map(child => {
                     console.log(child);
-                    return(<LessonListing key={child.id} lesson={child} />);
+                    return (<LessonListing key={child.id} lesson={child} />);
                 })}
             </ul>
         </div>
