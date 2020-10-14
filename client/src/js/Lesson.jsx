@@ -1,11 +1,19 @@
 import React, { Component } from "react";
-import { Container, Spinner} from "react-bootstrap";
+import { Container, Spinner, Button, ButtonGroup } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ReactMarkdown from "react-markdown"
 import SunEditor from 'suneditor-react';
 import katex from "katex";
 import 'suneditor/dist/css/suneditor.min.css'; // Import Sun Editor's CSS File
 import 'katex/dist/katex.min.css'
+import {
+  HashRouter,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+  useParams,
+} from "react-router-dom";
 
 class Lesson extends Component {
 
@@ -92,15 +100,19 @@ class Lesson extends Component {
         <LessonName name={this.state.serverLesson.name} />
 
 
-        <button onClick={() => {
+        <Link to={"../browser"}>
+          <Button variant="dark" >Back</Button>
+        </Link>
+
+        <Button variant="dark" onClick={() => {
           this.setState({
             isView: !this.state.isView,
             startingValue: this.state.serverLesson.content,
           })
         }
+        }>Toggle View</Button>
 
 
-        }>Toggle View</button>
         {this.state.isView ?
           <SunEditor
             setContents={this.state.startingValue}
@@ -144,7 +156,7 @@ class Lesson extends Component {
     );
   }
 
- 
+
 
 }
 
