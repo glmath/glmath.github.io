@@ -14,7 +14,6 @@ import {
   Redirect,
   useParams,
 } from "react-router-dom";
-
 class Lesson extends Component {
 
   constructor(props) {

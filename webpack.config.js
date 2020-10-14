@@ -7,7 +7,8 @@ module.exports = {
         },
         output: {
                 filename: "bundle.js",
-                path: path.join(__dirname, "./client/dist"),
+                path: path.join(__dirname, "./client/dist/"),
+                publicPath: '/client/dist/',
         },
         mode: "development",
         module: {
@@ -27,7 +28,8 @@ module.exports = {
                                 test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
                                 loader: 'url-loader',
                                 options: {
-                                        limit: 10000
+                                        limit: 10000,
+                                        // outputPath: './'
                                 }
                         },
                         {
