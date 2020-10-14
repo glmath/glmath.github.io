@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 7772;
+const { exec } = require("child_process");
 
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
@@ -15,6 +16,7 @@ let usersCollection = null;
 let lessonsCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 const fs = require('fs');
+const { ListGroupItem } = require("react-bootstrap");
 
 // since creating a lesson tree is expensive, memonize it to optimize
 let cachedLessonTree = {};
@@ -43,9 +45,9 @@ function mongoSetUpDone() {
   app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    if(req.headers.origin == undefined){
+    if (req.headers.origin == undefined) {
       res.setHeader('Access-Control-Allow-Origin', "http://127.0.0.1");
-    }else{
+    } else {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     }
 
@@ -187,18 +189,50 @@ function mongoSetUpDone() {
 
   app.post("/post/lesson-to-github/", (req, res) => {
     let id = req.body.id;
+    let filename = __dirname + "/../client/lessons/" + id + ".json";
 
-    fs.writeFile(__dirname +  "/../client/lessons/" + id + ".json", JSON.stringify(req.body), function(err) {
-        if(err) {
-            return console.log(err);
-        }
-        console.log("The file was saved!");
-    }); 
+    fs.writeFile(filename, JSON.stringify(req.body), function (err) {
+      if (err) {
+        return console.log(err);
+      }
+      console.log("The file was saved!");
+      commitToGithub(id, filename, () => {
+        // let filename = __dirname + "/../client/lessons/" + "cachefile" + ".json";
+        // fs.writeFile(filename, Date.now(), function (err) {
+        //   commitToGithub(filename, () => {});
+        // });
+      })
+    });
 
     res.send(JSON.stringify({
       status: "success",
     }));
   });
+
+  function commitToGithub(id, filename, callback) {
+    ExecuteCommand("git add " + filename, (out) => {
+      ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
+        ExecuteCommand("git push", (out) => {
+          console.log("Pushed changes to github");
+        });
+      });
+    });
+
+  }
+  function ExecuteCommand(cmnd, callback) {
+    exec(cmnd, (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      callback(stdout);
+    });
+  }
 
   app.post("/post/create/lesson/", (req, res) => {
     let newLesson = req.body;
@@ -237,7 +271,7 @@ function mongoSetUpDone() {
       res.send({ status: "success" });
 
     });
-    
+
 
 
 
@@ -258,10 +292,10 @@ function mongoSetUpDone() {
   });
 
   app.get('/get/lesson-tree/:id', (req, res) => {
-    if(!shouldRecalculateTree){
-        res.send(JSON.stringify(cachedLessonTree));
-        return;
-    }else{
+    if (!shouldRecalculateTree) {
+      res.send(JSON.stringify(cachedLessonTree));
+      return;
+    } else {
       createLessonTree("root", (tree) => {
         res.send(JSON.stringify(tree));
       });
@@ -289,9 +323,9 @@ function mongoSetUpDone() {
 
     // Do breadth first search to create a tree with all the children in a compact form of name, id, and children. 
     // it is slightly confusing since the children end up being used as a placeholder for the next layers id's
-    while(queue.length > 0){
+    while (queue.length > 0) {
       numberInLayer = queue.length;
-      for(let k =0; k< numberInLayer; k++){
+      for (let k = 0; k < numberInLayer; k++) {
         let newRoot = queue.shift();
 
         let childrenIds = newRoot.children;
@@ -301,7 +335,7 @@ function mongoSetUpDone() {
           let lesId = childrenIds[i];
 
           let lesson = await findLessonFromDatabase(lesId);
-          let compact = {id: lesson.id, name: lesson.name, children: lesson.children}; // the lesson.children is just a placeholder used in the next round
+          let compact = { id: lesson.id, name: lesson.name, children: lesson.children }; // the lesson.children is just a placeholder used in the next round
 
           newRoot.children.push(compact); // we add it here to fix it later
           queue.push(compact);
