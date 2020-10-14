@@ -13,21 +13,26 @@ class Lesson extends Component {
     super(props);
 
     this.state = {
-      serverLesson: null,
-      isView: false,
-      startingValue: "",
-      lastSaveTimeout: "",
+      serverLesson: null, // the lesson from the server
+      isView: false, // whetor we should show an editor or not
+      startingValue: "", // the starting value of the editor, for when converting between the two
+      lastSaveTimeout: "", // used to keep track of the last save
     };
-    console.log(props.id);
+
+    // update with inital data from the server
     this.getFromServer();
   }
 
   editorOnChange = (value) => {
+
+    // We do not want to constantly save, so only call the server save function after 0.250 seconds of not typing (this is sort of like debounce function from underscore js)
     clearTimeout(this.state.lastSaveTimeout);
     let timeout = setTimeout(() => {
       this.saveToServer(value);
     }, 250);
 
+
+    // use this temp to update the content field of the serverLesson
     let lesson = this.state.serverLesson;
     lesson.content = value;
 
@@ -50,7 +55,6 @@ class Lesson extends Component {
         content: value,
       })
     })
-    console.log(value);
   }
 
   getFromServer = () => {
@@ -73,6 +77,8 @@ class Lesson extends Component {
 
 
   render() {
+
+    // if we have not loaded yet, display spinner
     if (this.state.serverLesson == null) {
       return (
         <Spinner className="spinner" animation="border" role="status">

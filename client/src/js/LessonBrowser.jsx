@@ -15,37 +15,23 @@ class LessonBrowser extends Component {
         super(props);
 
         this.state = {
-            newLessonInput: "",
-            lessonTree: { children: [] },
+            newLessonInput: "", //
+            lessonTree: { children: [] }, // where the lesson tree is storeed
         };
 
-        this.refreshLessonsFromServer();
+        this.refreshLessonsFromServer(); // load the lesson tree from the server
     }
     componentDidMount() {
     }
 
-    getFromServer = () => {
-        fetch(this.props.url + "/get/lesson/" + this.props.id, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-        }).then(response => response.json())
-            .then(data => {
-                this.setState({
-                    starting_value: data.lesson.content,
-                    raw_content: data.lesson.content,
-                })
-            });
-    }
-
-
 
     createNewLesson = () => {
+
         let lessonName = this.state.newLessonInput;
         // create lesson id using time and name
         let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
+
+        // send request to server to create new lesson
         fetch(this.props.url + "/post/create/lesson/", {
             method: 'POST',
             headers: {
@@ -84,15 +70,7 @@ class LessonBrowser extends Component {
     }
 
     render() {
-        // let tree = <div></div>;
-        // let stack = [];
-        // stack.push(this.state.lessonTree);
-        // while (stack.length > 0) {
-
-        //     let lesson = stack.pop();
-        // }
-
-        return (
+           return (
             <div>
                 Lesson Browser
                 <div className="lesson-links">
@@ -101,6 +79,7 @@ class LessonBrowser extends Component {
                     <input type="text"
                         value={this.state.newLessonInput}
                         onChange={(e) => this.setState({ newLessonInput: e.target.value })} />
+
                     <button onClick={this.createNewLesson}> create </button>
 
                 </div>
@@ -112,6 +91,7 @@ class LessonBrowser extends Component {
 
 }
 
+// this is a recursive componenet, that recursivly displays its children untill it runs out
 function LessonListing(props) {
     return (
         <div>

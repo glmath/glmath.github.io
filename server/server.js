@@ -289,6 +289,7 @@ function mongoSetUpDone() {
     }
 
 
+    // this is to memonize so we dont have to redo this expensive calculation everytime
     cachedLessonTree = tree;
     shouldRecalculateTree = false;
     callback(tree);
