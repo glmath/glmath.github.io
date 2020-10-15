@@ -15,12 +15,19 @@ import CreateAccount from "./CreateAccount.jsx";
 
 import Lesson from "./Lesson.jsx"
 import LessonBrowser from "./LessonBrowser.jsx"
+
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
+
 class LMath extends Component {
 
   constructor(props){
     super(props);
+    // TEMP FOR TESTING 
+    let admin = cookies.get("isAdmin") == "true";
+
     this.state = {
-      isAdmin: true,
+      isAdmin: admin,
     }
   }
 
@@ -29,6 +36,7 @@ class LMath extends Component {
       <Container >
 
         <Button variant="dark" onClick={() => {
+          cookies.set("isAdmin", !this.state.isAdmin ? "true" : "false");
           this.setState({
             isAdmin: !this.state.isAdmin,
           })

@@ -85,7 +85,7 @@ class Lesson extends Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'applicaafion/json',
       },
       body: JSON.stringify({
         id: this.props.id,
