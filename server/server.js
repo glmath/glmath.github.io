@@ -219,7 +219,27 @@ function mongoSetUpDone() {
     });
   });
 
+  function squashLastTwoCommits(){
+    
+
+  }
+
   function commitToGithub(id, filename, callback) {
+
+    ExecuteCommand("git add " + filename, (out) => {
+      ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
+        ExecuteCommand("git push", (out) => {
+          console.log("Pushed changes to github");
+        });
+      });
+    });
+
+
+  }
+  function DoGitResetCycle(filename, id){
+    let filename = __dirname + "/../client/lessons/cacheFile.json";
+    fs.writeFile(filename, Date.now() , function (err) {
+
     ExecuteCommand("git add " + filename, (out) => {
       ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
         ExecuteCommand("git push", (out) => {
