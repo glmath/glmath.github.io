@@ -21,7 +21,7 @@ class Lesson extends Component {
 
     this.state = {
       serverLesson: null, // the lesson from the server
-      isView: false, // whetor we should show an editor or not
+      isEditor: false, // whetor we should show an editor or not
       startingValue: "", // the starting value of the editor, for when converting between the two
       lastSaveTimeout: "", // used to keep track of the last save
       showingUploadModal: false,
@@ -47,14 +47,36 @@ class Lesson extends Component {
   }
 
   componentDidUpdate() {
-    if(!this.haveLoadedQuill){
+    if (!this.haveLoadedQuill && this.state.isEditor) {
       const enableMathQuillFormulaAuthoring = mathquill4quill({ Quill });
       enableMathQuillFormulaAuthoring(this.reactQuill.current.editor, {
-        operators: [["\\sqrt[n]{x}", "\\nthroot"], ["\\frac{x}{y}","\\frac"]],
+        operators: [["\\pm","\\pm"],["\\sqrt{x}","\\sqrt"],["\\sqrt[n]{x}","\\nthroot"],["\\frac{x}{y}","\\frac"],
+        ["\\sum^{s}_{x}{d}", "\\sum"],["\\prod^{s}_{x}{d}", "\\prod"],["\\coprod^{s}_{x}{d}", "\\coprod"],
+        ["\\int^{s}_{x}{d}", "\\int"],["\\binom{n}{k}", "\\binom"]],
+
         displayHistory: true, // defaults to false
         historyCacheKey: '__my_app_math_history_cachekey_', // optional
         historySize: 20 // optional (defaults to 10)
       });
+
+
+      // console.log(this.reactQuill.current.editor);
+      // var toolbar = this.reactQuill.current.editor.getModule('toolbar');
+      // toolbar.addHandler('omega', function () {
+      //   console.log('omega')
+      // });
+
+
+
+      var customButton = document.querySelector('.ql-ytembed');
+      customButton.addEventListener('click', () => {
+        var range = this.reactQuill.current.editor.getSelection();
+        if (range) {
+          this.reactQuill.current.editor.insertText(range.index, "Ω");
+        }
+      });
+
+
       this.haveLoadedQuill = true;
     }
   }
@@ -85,7 +107,7 @@ class Lesson extends Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'applicaafion/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         id: this.props.id,
@@ -161,6 +183,40 @@ class Lesson extends Component {
 
   render() {
 
+    var toolbarOptions = {
+      container: [
+        ['formula', 'bold', 'italic', 'underline', 'strike', 'blockquote'],        // toggled buttons
+        ['link'],
+        ['ytembed'],
+
+        // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        // [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+        [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
+        // [{ 'direction': 'rtl' }],                         // text direction
+
+        // [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+        // [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+        [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+        [{ 'font': [] }],
+        [{ 'align': [] }],
+
+        ['clean']                                         // remove formatting button
+      ],
+      handlers: {
+        // 'omega': () => {
+        //     // var range = this.reactQuill.current.editor.getSelection();
+        //     // if (range) {
+        //     //   this.reactQuill.current.editor.insertText(range.index, "Ω");
+        //     // }
+
+        // }
+      }
+
+    }
+
+
     // if we have not loaded yet, display spinner
     if (this.state.serverLesson == null) {
       return (
@@ -194,25 +250,33 @@ class Lesson extends Component {
 
           <Button variant="dark" onClick={() => {
             this.setState({
-              isView: !this.state.isView,
+              isEditor: !this.state.isEditor,
               startingValue: this.state.serverLesson.content,
             })
           }
           }>Toggle Edit</Button> </div> : ""}
 
+        {this.state.isEditor ?
+          <ReactQuill
+            ref={this.reactQuill}
+            theme="snow"
+            value={this.state.editorState}
+            onChange={this.editorOnChange}
+            modules={{
+              formula: true,
+              toolbar: toolbarOptions,
+            }}
+          />
+          :
 
-        <ReactQuill
-          ref={this.reactQuill}
-          theme="snow"
-          value={this.state.editorState}
-          onChange={this.editorOnChange}
-          modules={{
-            formula: true,
-            toolbar: [["formula", /* ... other toolbar items here ... */]]
-          }}
-        />
-
-        {/* {this.state.isView ? */}
+          <ReactQuill
+            ref={this.reactQuill}
+            theme="bubble"
+            value={this.state.editorState}
+            readOnly={true}
+          />
+        }
+        {/* {this.state.isEditor ? */}
         {/* :<div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.serverLesson.content }} /> */}
         {/* } */}
         {/* <LessonViewer rawContent={this.state.rawContent}></LessonViewer> */}
