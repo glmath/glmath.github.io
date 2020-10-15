@@ -108,8 +108,9 @@ class Lesson extends Component {
 
     fetch(url, {
       headers: {
-        "pragma": "no-cache",
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': 0
       }
     })
       .then(function (response) {
