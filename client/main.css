@@ -92,3 +92,8 @@ div.spinner{
   width: 50em;
   height: 50em;
 }
+
+
+span.ql-formats {
+  background: white !important;
+}

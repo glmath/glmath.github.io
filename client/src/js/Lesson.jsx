@@ -1,23 +1,23 @@
-import React, { Component } from "react";
-import { Container, Spinner, Button, ButtonGroup, Modal } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import ReactMarkdown from "react-markdown"
-import SunEditor from 'suneditor-react';
-import katex from "katex";
-import 'suneditor/dist/css/suneditor.min.css'; // Import Sun Editor's CSS File
-import 'katex/dist/katex.min.css'
+import mathquill4quill from 'mathquill4quill';
+import 'mathquill4quill/mathquill4quill.css';
+import React, { Component, useState } from "react";
+import { Button, Modal, Spinner } from "react-bootstrap";
+import ReactQuill, { Quill } from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import {
-  HashRouter,
-  Switch,
-  Route,
-  Link,
-  Redirect,
-  useParams,
+  Link
 } from "react-router-dom";
+
+
+
 class Lesson extends Component {
 
   constructor(props) {
     super(props);
+
+    this.reactQuill = React.createRef();
+    this.haveLoadedQuill = false;
 
     this.state = {
       serverLesson: null, // the lesson from the server
@@ -25,6 +25,8 @@ class Lesson extends Component {
       startingValue: "", // the starting value of the editor, for when converting between the two
       lastSaveTimeout: "", // used to keep track of the last save
       showingUploadModal: false,
+      editorState: "",
+
     };
 
     // update with inital data from the server
@@ -33,6 +35,28 @@ class Lesson extends Component {
     } else {
       this.getFromGithub();
     }
+
+  }
+
+
+
+  componentDidMount() {
+    if (this.reactQuill.current == null) {
+      return;
+    }
+  }
+
+  componentDidUpdate() {
+    if(!this.haveLoadedQuill){
+      const enableMathQuillFormulaAuthoring = mathquill4quill({ Quill });
+      enableMathQuillFormulaAuthoring(this.reactQuill.current.editor, {
+        operators: [["\\sqrt[n]{x}", "\\nthroot"], ["\\frac{x}{y}","\\frac"]],
+        displayHistory: true, // defaults to false
+        historyCacheKey: '__my_app_math_history_cachekey_', // optional
+        historySize: 20 // optional (defaults to 10)
+      });
+      this.haveLoadedQuill = true;
+    }
   }
 
   editorOnChange = (value) => {
@@ -40,22 +64,23 @@ class Lesson extends Component {
     // We do not want to constantly save, so only call the server save function after 0.250 seconds of not typing (this is sort of like debounce function from underscore js)
     clearTimeout(this.state.lastSaveTimeout);
     let timeout = setTimeout(() => {
-      this.saveToServer(value);
+      this.saveToServer(this.state.value);
     }, 250);
 
 
     // use this temp to update the content field of the serverLesson
     let lesson = this.state.serverLesson;
-    lesson.content = value;
+    lesson.content = this.state.value;
 
     this.setState({
       serverLesson: lesson,
       lastSaveTimeout: timeout,
+      editorState: value,
     });
 
   }
 
-  saveToServer = (value) => {
+  saveToServer = () => {
     fetch(this.props.url + "/post/lesson/", {
       method: 'POST',
       headers: {
@@ -64,13 +89,13 @@ class Lesson extends Component {
       },
       body: JSON.stringify({
         id: this.props.id,
-        content: value,
+        content: this.state.editorState,
       })
     })
   }
 
   saveToGithub = () => {
-    this.setState({showingUploadModal: true});
+    this.setState({ showingUploadModal: true });
 
     fetch(this.props.url + "/post/lesson-to-github/", {
       method: 'POST',
@@ -80,7 +105,7 @@ class Lesson extends Component {
       },
       body: JSON.stringify({
         id: this.props.id,
-        content: this.state.serverLesson.content,
+        content: this.state.editorState,
       })
     })
   }
@@ -98,7 +123,7 @@ class Lesson extends Component {
       .then(data => {
         this.setState({
           serverLesson: data,
-          startingValue: data.content,
+          editorState: data.content,
         });
       });
   }
@@ -123,7 +148,7 @@ class Lesson extends Component {
         console.log(data);
         this.setState({
           serverLesson: data,
-          startingValue: data,
+          editorState: data.content,
         });
       }.bind(this))
       .catch(function (err) {
@@ -150,9 +175,9 @@ class Lesson extends Component {
         <LessonName name={this.state.serverLesson.name} />
 
 
-        <UploadToServerModal 
-        isShowing={this.state.showingUploadModal} 
-        close={() => this.setState({showingUploadModal: false})}/>
+        <UploadToServerModal
+          isShowing={this.state.showingUploadModal}
+          close={() => this.setState({ showingUploadModal: false })} />
 
         <Link to={"../browser"}>
           <Button variant="dark" >Back</Button>
@@ -160,58 +185,36 @@ class Lesson extends Component {
 
 
 
-        {this.props.isAdmin ?<div>
-        <Button variant="dark" onClick={() => {
-          this.saveToGithub();
-        }
-        }>Publish To Everyone</Button>
+        {this.props.isAdmin ? <div>
+          <Button variant="dark" onClick={() => {
+            this.saveToGithub();
+          }
+          }>Publish To Everyone</Button>
 
 
-        <Button variant="dark" onClick={() => {
-          this.setState({
-            isView: !this.state.isView,
-            startingValue: this.state.serverLesson.content,
-          })
-        }
-        }>Toggle Edit</Button> </div> : ""}
+          <Button variant="dark" onClick={() => {
+            this.setState({
+              isView: !this.state.isView,
+              startingValue: this.state.serverLesson.content,
+            })
+          }
+          }>Toggle Edit</Button> </div> : ""}
 
 
-        {this.state.isView ?
-          <SunEditor
-            setContents={this.state.startingValue}
+        <ReactQuill
+          ref={this.reactQuill}
+          theme="snow"
+          value={this.state.editorState}
+          onChange={this.editorOnChange}
+          modules={{
+            formula: true,
+            toolbar: [["formula", /* ... other toolbar items here ... */]]
+          }}
+        />
 
-            setOptions={{
-              height: 200,
-              katex: { // Custom option
-                src: katex,
-                options: {
-                  /** default options **
-                  * throwOnError: false,
-                  */
-                  maxSize: 4
-                }
-              },
-
-              buttonList: [
-                ['undo', 'redo'],
-                ['font', 'fontSize', 'formatBlock'],
-                // ['paragraphStyle', 'blockquote'],
-                ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
-                ['fontColor', 'hiliteColor', 'textStyle'],
-                ['removeFormat'],
-                ['outdent', 'indent'],
-                ['align', 'horizontalRule', 'list', 'lineHeight'],
-                ['table', 'link', 'image', 'video', 'math'], // You must add the 'katex' library at options to use the 'math' plugin.
-                // ['imageGallery'], // You must add the "imageGalleryUrl".
-                ['fullScreen', 'showBlocks', 'codeView'],
-                ['preview', 'print'],
-                ['save', 'template'],
-              ],
-            }}
-            onChange={this.editorOnChange}
-          /> :
-          <div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.serverLesson.content }} />
-        }
+        {/* {this.state.isView ? */}
+        {/* :<div className={"sun-editor-editable"} dangerouslySetInnerHTML={{ __html: this.state.serverLesson.content }} /> */}
+        {/* } */}
         {/* <LessonViewer rawContent={this.state.rawContent}></LessonViewer> */}
         {/* <LessonEditor rawContent_set={this.rawContentSet} rawContent={this.state.rawContent} /> */}
 
@@ -224,16 +227,13 @@ class Lesson extends Component {
 }
 
 
-function LessonViewer(props) {
-  return (<div >
-    <div className="lesson-viewer">
-      {props.rawContent}
-      <ReactMarkdown source={props.rawContent} />
-    </div>
 
-  </div>)
+function Editor(props) {
+  const [value, setValue] = useState('');
+  return (
+    <ReactQuill ref={props.eref} theme="snow" value={value} onChange={setValue} />
+  );
 }
-
 
 function LessonName(props) {
   return <h1> {props.name} </h1>
@@ -253,25 +253,36 @@ function LessonEditor(props) {
 
 
 
+function LessonViewer(props) {
+  return (<div >
+    <div className="lesson-viewer">
+      {props.rawContent}
+      <ReactMarkdown source={props.rawContent} />
+    </div>
+
+  </div>)
+}
 
 
-function UploadToServerModal(props){
+
+
+function UploadToServerModal(props) {
 
   const handleClose = () => props.close();
 
   return (
-      <Modal show={props.isShowing} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Published to everyone!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>This lesson has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
+    <Modal show={props.isShowing} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Published to everyone!</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>This lesson has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
           </Button>
-        </Modal.Footer>
-      </Modal>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
