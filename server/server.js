@@ -209,6 +209,16 @@ function mongoSetUpDone() {
     }));
   });
 
+  app.post("/post/lesson-tree-to-github/", (req, res) => {
+    let id = "LessonTree";
+    let filename = __dirname + "/../client/lessons/lessontree.json";
+    commitToGithub(id, filename, () => {
+      res.send(JSON.stringify({
+        status: "success",
+      }));
+    });
+  });
+
   function commitToGithub(id, filename, callback) {
     ExecuteCommand("git add " + filename, (out) => {
       ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
@@ -217,8 +227,8 @@ function mongoSetUpDone() {
         });
       });
     });
-
   }
+
   function ExecuteCommand(cmnd, callback) {
     exec(cmnd, (error, stdout, stderr) => {
       if (error) {
@@ -280,7 +290,7 @@ function mongoSetUpDone() {
   });
 
 
-  app.get('/get/lesson/:id/', (req, res) => {
+  app.get('/get/lesson/:id', (req, res) => {
     lessonsCollection.findOne({ _id: req.params.id }, (err, lesson) => {
       if (err || lesson == null || lesson == undefined) {
         res.status(404).send(JSON.stringify({}));
@@ -291,7 +301,8 @@ function mongoSetUpDone() {
     });
   });
 
-  app.get('/get/lesson-tree/:id/', (req, res) => {
+  app.get('/get/lesson-tree/:id', (req, res) => {
+
     if (!shouldRecalculateTree) {
       res.send(JSON.stringify(cachedLessonTree));
       return;
@@ -300,7 +311,6 @@ function mongoSetUpDone() {
         res.send(JSON.stringify(tree));
       });
     }
-
   });
 
   async function findLessonFromDatabase(id) {
@@ -345,6 +355,9 @@ function mongoSetUpDone() {
     }
 
 
+    fs.writeFile(__dirname + "/../client/lessons/lessontree.json", JSON.stringify(tree), function (err) {
+      console.log(err);
+    });
     // this is to memonize so we dont have to redo this expensive calculation everytime
     cachedLessonTree = tree;
     shouldRecalculateTree = false;

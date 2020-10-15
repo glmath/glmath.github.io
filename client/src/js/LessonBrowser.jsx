@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container } from "react-bootstrap";
+import { Container , Modal, Button} from "react-bootstrap";
 import {
     HashRouter,
     Switch,
@@ -17,9 +17,14 @@ class LessonBrowser extends Component {
         this.state = {
             newLessonInput: "", //
             lessonTree: { children: [] }, // where the lesson tree is storeed
+            showingUploadModal: false,
         };
 
-        this.refreshLessonsFromServer(); // load the lesson tree from the server
+        if (this.props.isAdmin) {
+            this.refreshLessonsFromServer(); // load the lesson tree from the server
+        } else {
+            this.getFromGithub();
+        }
     }
     componentDidMount() {
     }
@@ -53,7 +58,7 @@ class LessonBrowser extends Component {
 
 
     refreshLessonsFromServer = () => {
-        fetch(this.props.url + "/get/lesson-tree/root" + this.props.id + "/", {
+        fetch(this.props.url + "/get/lesson-tree/root", {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -68,12 +73,61 @@ class LessonBrowser extends Component {
             });
 
     }
+    getFromGithub = () => {
+        let url = this.props.clientUrl + "/lessons/lessontree.json";
+
+        fetch(url, {
+            // headers: {
+            //   "pragma": "no-cache",
+            //   'Cache-Control': 'no-cache'
+            // }
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Error in getting lesson.');
+            })
+            .then(function (data) {
+                console.log(data);
+                this.setState({
+                    lessonTree: data,
+                });
+            }.bind(this))
+            .catch(function (err) {
+                console.log("failed to load ", url, err.message);
+            });
+
+    }
+    saveToGithub = () => {
+        this.setState({ showingUploadModal: true });
+
+        fetch(this.props.url + "/post/lesson-tree-to-github/", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+            })
+        })
+    }
 
     render() {
-           return (
+        return (
             <div>
                 Lesson Browser
                 <div className="lesson-links">
+
+                    {this.props.isAdmin ? <div>
+                        <button onClick={() => {
+                            this.setState({ showingUploadModal: true });
+                            this.saveToGithub();
+                        }}> Publish lesson tree to main site </button>
+                        <UploadToServerModal isShowing={this.state.showingUploadModal} close={() => this.setState({ showingUploadModal: false })} /> </div> : ""
+                        }
+
+
                     {<LessonListing lesson={this.state.lessonTree} />}
 
                     <input type="text"
@@ -106,6 +160,26 @@ function LessonListing(props) {
             </ul>
         </div>
     )
+}
+
+function UploadToServerModal(props) {
+
+    const handleClose = () => props.close();
+
+    return (
+        <Modal show={props.isShowing} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Published to everyone!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>This lesson tree has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
+
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Close
+          </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 }
 
 

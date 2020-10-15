@@ -48,7 +48,7 @@ class LMath extends Component {
           <Route path="/math/:id" children={ <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl}/> }></Route>
 
           <Route path="/browser">
-            <LessonBrowser url={this.props.url} />
+            <LessonBrowser  url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin}/>
           </Route>
 
           <Route path="/">
