@@ -62,6 +62,7 @@ class Lesson extends Component {
         ["\\sum^{s}_{x}{d}", "\\sum"], ["\\prod^{s}_{x}{d}", "\\prod"], ["\\coprod^{s}_{x}{d}", "\\coprod"],
         ["\\int^{s}_{x}{d}", "\\int"], ["\\binom{n}{k}", "\\binom"]],
 
+
         displayHistory: true, // defaults to false
         historyCacheKey: '__my_app_math_history_cachekey_', // optional
         historySize: 20 // optional (defaults to 10)
