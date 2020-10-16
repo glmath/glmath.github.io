@@ -1,10 +1,11 @@
 {
-  "name": "pointshark",
+  "name": "GlMath",
   "version": "1.0.0",
   "description": "",
   "main": "server/server.js",
   "scripts": {
-    "start": "concurrently \"webpack --watch\" \"nodemon server/server.js --watch server/server.js\"",
+    "start":"node server/server.js",
+    "start-dev": "concurrently \"webpack --watch\" \"nodemon server/server.js --watch server/server.js\"",
     "start-dev-mon": "webpack --watch && nodemon"
   },
   "author": "Shahan Neda",
