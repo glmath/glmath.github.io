@@ -20,19 +20,29 @@ class LessonBrowser extends Component {
             lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
             showingUploadModal: false,
         };
+        this.updateTreeIfAdmin();
 
+    }
+    componentDidMount() {
+    }
+    componentDidUpdate(prevProps){
+        if(prevProps.isAdmin != this.props.isAdmin){
+            this.updateTreeIfAdmin();
+        }
+    }
+    updateTreeIfAdmin = () =>{
         if (this.props.isAdmin) {
             this.refreshLessonsFromServer(); // load the lesson tree from the server
         } else {
             this.getFromGithub();
         }
     }
-    componentDidMount() {
-    }
 
     saveLessonToServer = (id, parentId) => {
 
         console.log("telling server to move id", id, " to parent ", parentId);
+        this.setState({showingUploadModal: true});
+
         fetch(this.props.url + "/post/lesson/", {
             method: 'POST',
             headers: {
@@ -43,7 +53,13 @@ class LessonBrowser extends Component {
                 id: id,
                 parentId: parentId,
             })
-        })
+        }).then(response => response.json())
+        .then(data => {
+            if(data != undefined && data.status == "success"){
+                this.setState({showingUploadModal: false});
+                this.refreshLessonsFromServer();
+            }
+        });
     }
     createNewLesson = () => {
 

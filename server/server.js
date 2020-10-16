@@ -148,20 +148,23 @@ function mongoSetUpDone() {
 
   app.post('/post/lesson/', (req, res) => {
     let id = req.body.id;
-    console.log("posting lesson");
+    // console.log("******* NEW LESSON UPDATE***********");
+    // console.log("LESOSN BODY ", req.body);
 
-    if (lessonsCollection.findOne({ _id: id }, (err, lesson) => {
+    lessonsCollection.findOne({ _id: id }, (err, lesson) => {
       if (err || lesson == undefined || lesson == null) {
         // res.status(404).send({});
-        console.log("Trying to post to lesson not even made!");
+        // console.log("Trying to post to lesson not even made!");
         return;
       }
+      // console.log("LESSON IN DATA BASE", lesson);
 
-      console.log("lesson parent id vs req parent id", lesson.parentId, req.body.parentId);
-      // check if the parent id changed, if so tell the parent that its no longer a child
-      if (lesson.parentId != req.body.parentId && req.body.parentId != undefined) {
+      // console.log("lesson parent id vs req parent id", lesson.parentId, req.body.parentId);
+      // console.log("databse parent id: ", lesson.parentId, " request parent id", req.body.parentId)
+      // check if the parent id changed, if so tell the parent that its no longer a child, and also make sure we dont make ourself the parent
+      if (lesson.parentId != req.body.parentId && req.body.parentId != undefined && req.body.parentId != req.body.id) {
         shouldRecalculateTree = true;
-        console.log("moving lesson ", id, " to new parent ", req.body.parentId);
+        // console.log("moving lesson ", id, " to new parent ", req.body.parentId);
 
         // remove from old parent
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
@@ -176,17 +179,20 @@ function mongoSetUpDone() {
         lessonsCollection.findOne({ _id: req.body.parentId }, (err, newParentLesson) => {
           let children = newParentLesson.children;
           children.push(req.body.id);
-
           lessonsCollection.updateOne({ _id: newParentLesson.id }, { $set: { children: children } }, { upsert: true });
+
+          res.json({
+            status: "success",
+          });
+
         });
       }
-    }));
 
-    lessonsCollection.updateOne({ _id: id }, { $set: req.body }, { upsert: true });
+      lessonsCollection.updateOne({ _id: id }, { $set: req.body }, { upsert: true });
+    });
 
-    res.send(JSON.stringify({
-      status: "success",
-    }));
+
+
 
   });
 

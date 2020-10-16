@@ -29,15 +29,19 @@ class Lesson extends Component {
 
     };
 
+    console.log("test");
+    this.checkFromServerDependingOnAdmin();
+
+  }
+
+  checkFromServerDependingOnAdmin = () => {
     // update with inital data from the server
     if (this.props.isAdmin) {
       this.getFromServer();
     } else {
       this.getFromGithub();
     }
-
   }
-
 
 
   componentDidMount() {
@@ -46,19 +50,24 @@ class Lesson extends Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    if (prevProps.isAdmin != this.props.isAdmin) {
+      this.checkFromServerDependingOnAdmin();
+    }
+
     if (!this.haveLoadedQuill && this.state.isEditor) {
       const enableMathQuillFormulaAuthoring = mathquill4quill({ Quill });
       enableMathQuillFormulaAuthoring(this.reactQuill.current.editor, {
-        operators: [["\\pm","\\pm"],["\\sqrt{x}","\\sqrt"],["\\sqrt[n]{x}","\\nthroot"],["\\frac{x}{y}","\\frac"],
-        ["\\sum^{s}_{x}{d}", "\\sum"],["\\prod^{s}_{x}{d}", "\\prod"],["\\coprod^{s}_{x}{d}", "\\coprod"],
-        ["\\int^{s}_{x}{d}", "\\int"],["\\binom{n}{k}", "\\binom"]],
+        operators: [["\\pm", "\\pm"], ["\\sqrt{x}", "\\sqrt"], ["\\sqrt[n]{x}", "\\nthroot"], ["\\frac{x}{y}", "\\frac"],
+        ["\\sum^{s}_{x}{d}", "\\sum"], ["\\prod^{s}_{x}{d}", "\\prod"], ["\\coprod^{s}_{x}{d}", "\\coprod"],
+        ["\\int^{s}_{x}{d}", "\\int"], ["\\binom{n}{k}", "\\binom"]],
 
         displayHistory: true, // defaults to false
         historyCacheKey: '__my_app_math_history_cachekey_', // optional
         historySize: 20 // optional (defaults to 10)
       });
 
+      
 
       // console.log(this.reactQuill.current.editor);
       // var toolbar = this.reactQuill.current.editor.getModule('toolbar');
