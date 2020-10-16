@@ -148,6 +148,7 @@ function mongoSetUpDone() {
 
   app.post('/post/lesson/', (req, res) => {
     let id = req.body.id;
+    console.log("posting lesson");
 
     if (lessonsCollection.findOne({ _id: id }, (err, lesson) => {
       if (err || lesson == undefined || lesson == null) {
@@ -156,9 +157,11 @@ function mongoSetUpDone() {
         return;
       }
 
+      console.log("lesson parent id vs req parent id", lesson.parentId, req.body.parentId);
       // check if the parent id changed, if so tell the parent that its no longer a child
       if (lesson.parentId != req.body.parentId && req.body.parentId != undefined) {
         shouldRecalculateTree = true;
+        console.log("moving lesson ", id, " to new parent ", req.body.parentId);
 
         // remove from old parent
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
@@ -278,6 +281,7 @@ function mongoSetUpDone() {
   app.post("/post/create/lesson/", (req, res) => {
         let newLesson = req.body;
         let parentId = req.body.parentId;
+        console.log("Updating lesson", newLesson.id, " parent,", parentId);
         if (!newLesson || !parentId || newLesson.id == "" || newLesson.id == undefined || newLesson.id == null) {
           console.log("ERROR NO LESSON OR PARENT ID");
         }
@@ -292,11 +296,12 @@ function mongoSetUpDone() {
 
 
 
+
         // we need to tell the parents of this lesson that we added a new child
         console.log(parentId);
         lessonsCollection.findOne({ _id: parentId }, (err, lesson) => {
           if (err || !lesson) {
-            console.log(lesson);
+            // console.log(lesson);
             try {
               res.send("LESSON PARENT NOT FOUND");
             } catch {
@@ -344,6 +349,11 @@ function mongoSetUpDone() {
       }
     });
 
+  app.post("/post/lesson-tree/", (req, res) => {
+        // let tree = req.body;
+
+  });
+
     async function findLessonFromDatabase(id) {
       const lesson = await lessonsCollection.findOne({ _id: id })
       return lesson
@@ -386,13 +396,13 @@ function mongoSetUpDone() {
       }
 
 
-      fs.writeFile(__dirname + "/../client/lessons/lessontree.json", JSON.stringify(tree), function (err) {
+      fs.writeFile(__dirname + "/../client/lessons/lessontree.json", JSON.stringify([tree]), function (err) {
         console.log(err);
       });
       // this is to memonize so we dont have to redo this expensive calculation everytime
-      cachedLessonTree = tree;
+      cachedLessonTree = [tree];
       shouldRecalculateTree = false;
-      callback(tree);
+      callback([tree]);
     }
 
     app.use('/', express.static("./"))

@@ -82,17 +82,26 @@ tr{
   background-color: #222 !important;
 }
 
-li {
-  border: 1px solid;
-  padding: 10px;
+li.nestable-item {
+  padding: 14px 17px;
   list-style: none;
+  background-color: #222222;
+  margin: 0px 12px;
+  border-left: 8px solid black;
 }
+
+
 
 div.spinner{
   width: 50em;
   height: 50em;
 }
 
+
+.lesson-browser-lesson-text{
+  border: 1px solid black;
+  padding: 9px;
+}
 
 span.ql-formats {
   background: white !important;

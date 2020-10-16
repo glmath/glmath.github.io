@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container , Modal, Button} from "react-bootstrap";
+import { Container, Modal, Button } from "react-bootstrap";
 import {
     HashRouter,
     Switch,
@@ -8,6 +8,7 @@ import {
     Redirect,
     useParams,
 } from "react-router-dom";
+import Nestable from 'react-nestable';
 
 class LessonBrowser extends Component {
 
@@ -16,7 +17,7 @@ class LessonBrowser extends Component {
 
         this.state = {
             newLessonInput: "", //
-            lessonTree: { children: [] }, // where the lesson tree is storeed
+            lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
             showingUploadModal: false,
         };
 
@@ -29,7 +30,21 @@ class LessonBrowser extends Component {
     componentDidMount() {
     }
 
+    saveLessonToServer = (id, parentId) => {
 
+        console.log("telling server to move id", id, " to parent ", parentId);
+        fetch(this.props.url + "/post/lesson/", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: id,
+                parentId: parentId,
+            })
+        })
+    }
     createNewLesson = () => {
 
         let lessonName = this.state.newLessonInput;
@@ -89,7 +104,6 @@ class LessonBrowser extends Component {
                 throw new Error('Error in getting lesson.');
             })
             .then(function (data) {
-                console.log(data);
                 this.setState({
                     lessonTree: data,
                 });
@@ -112,8 +126,40 @@ class LessonBrowser extends Component {
             })
         })
     }
+    lessonTreeNestChange = (tree, item) => {
+        console.log(JSON.stringify(item));
+
+        // bfs to look for parent 
+        let queue = [];
+        queue.push(tree[0]);
+        let parentId = null
+        while(queue.length > 0){
+            let poppedItem = queue.pop();
+            if(poppedItem.children.length < 1){
+                continue;
+            }
+            queue.push(...poppedItem.children);
+            // if this current node has the item we want as a child, then it must be the parerent so we save that
+            let searchItem = poppedItem.children.find(i => item.id === i.id);
+
+            if(searchItem != undefined && searchItem != null){
+                console.log("FOUND", searchItem);
+                parentId = poppedItem.id; // we have it as a child so must be parent
+                break;
+            }
+        }
+
+        if(parentId != null){
+            this.saveLessonToServer(item.id, parentId);
+        }else{
+            console.error("Parent not found!");
+        }
+        
+
+    }
 
     render() {
+        console.log(this.state.lessonTree)
         return (
             <div>
                 Lesson Browser
@@ -125,10 +171,15 @@ class LessonBrowser extends Component {
                             this.saveToGithub();
                         }}> Publish lesson tree to main site </button>
                         <UploadToServerModal isShowing={this.state.showingUploadModal} close={() => this.setState({ showingUploadModal: false })} /> </div> : ""
-                        }
+                    }
 
 
-                    {<LessonListing lesson={this.state.lessonTree} />}
+                    <Nestable
+                        items={this.state.lessonTree}
+                        renderItem={LessonListing}
+                        onChange={this.lessonTreeNestChange}
+                    />
+                    {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
                     <input type="text"
                         value={this.state.newLessonInput}
@@ -149,15 +200,16 @@ class LessonBrowser extends Component {
 function LessonListing(props) {
     return (
         <div>
-            <Link to={"/math/" + props.lesson.id}>
-                <li key={props.lesson.id}>{props.lesson.name}</li>
+            {/* {props} */}
+            <Link to={"/math/" + props.item.id}>
+                <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
             </Link>
 
-            <ul>
+            {/* <ul>
                 {props.lesson.children.map(child => {
                     return (<LessonListing key={child.id} lesson={child} />);
                 })}
-            </ul>
+            </ul> */}
         </div>
     )
 }
