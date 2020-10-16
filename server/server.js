@@ -10,11 +10,14 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 let db = null;
 var cookieParser = require('cookie-parser')
-let auth = require("./auth.json");
+// let auth = require("./auth.json");
 
 let usersCollection = null;
 let lessonsCollection = null;
-let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
+// let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
+// cons
+console.log(process.env.DB_PASSWORD);
+let uri = "mongodb+srv://nedaChatAdmin:" + process.env.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 const fs = require('fs');
 const { ListGroupItem } = require("react-bootstrap");
 
