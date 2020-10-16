@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = 7772;
+const port = process.env.PORT;
 const { exec } = require("child_process");
 
 const mongo = require("mongodb");
