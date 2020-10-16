@@ -128,6 +128,7 @@ class LessonBrowser extends Component {
     }
     lessonTreeNestChange = (tree, item) => {
         console.log(JSON.stringify(item));
+        console.log(tree);
 
         // bfs to look for parent 
         let queue = [];
