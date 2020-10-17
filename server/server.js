@@ -152,13 +152,13 @@ function mongoSetUpDone() {
 
   app.post('/post/lesson/', (req, res) => {
     let id = req.body.id;
-    // console.log("******* NEW LESSON UPDATE***********");
-    // console.log("LESOSN BODY ", req.body);
+    console.log("******* NEW LESSON UPDATE***********");
+    console.log("LESOSN BODY ", req.body);
 
     lessonsCollection.findOne({ _id: id }, (err, lesson) => {
       if (err || lesson == undefined || lesson == null) {
-        // res.status(404).send({});
-        // console.log("Trying to post to lesson not even made!");
+        res.status(404).send({});
+        console.log("Trying to post to lesson not even made!");
         return;
       }
       // console.log("LESSON IN DATA BASE", lesson);
