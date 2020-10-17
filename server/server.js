@@ -38,9 +38,13 @@ MongoClient.connect(uri, function (err, dbtemp) {
   lessonsCollection = dbo.collection("lessons");
 
   mongoSetUpDone();
+
 });
 
 function mongoSetUpDone() {
+  if(process.env.isHeroku == "true"){
+    ExecuteCommand("git clone https://github.com/glmath/glmath.github.io temp && mv temp/.git ./.git && rm -rf temp");
+  }
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(cookieParser());
   app.use(express.urlencoded()); // to support URL-encoded bodiesk
