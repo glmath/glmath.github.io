@@ -43,7 +43,8 @@ MongoClient.connect(uri, function (err, dbtemp) {
 
 function mongoSetUpDone() {
   if(process.env.isHeroku == "true"){
-    ExecuteCommand("git clone https://github.com/glmath/glmath.github.io temp && mv temp/.git ./.git && rm -rf temp");
+
+    ExecuteCommand("git clone https://glMathUpdateBot:" + process.env.GITHUB_PASSWORD + "@github.com/glMath/glmath.github.io.git temp && mv temp/.git ./.git && rm -rf temp");
   }
   app.use(express.json());       // to support JSON-encoded bodies
   app.use(cookieParser());
