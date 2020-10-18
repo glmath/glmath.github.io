@@ -43,7 +43,7 @@ MongoClient.connect(uri, function (err, dbtemp) {
 
 function mongoSetUpDone() {
   if(process.env.isHeroku == "true"){
-    let gitConfig = 'git config --global user.email "shahan.neda+glmath@gmail.com" && git config --global user.name "glMathUpdateBot && "';
+    let gitConfig = 'git config user.email shahan.neda+glmath@gmail.com && git config --global user.name glMathUpdateBot && ';
 
     ExecuteCommand(gitConfig + "git clone https://glMathUpdateBot:" + process.env.GITHUB_PASSWORD + "@github.com/glMath/glmath.github.io.git temp && mv temp/.git ./.git && rm -rf temp");
   }
