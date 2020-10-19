@@ -97,7 +97,9 @@ class Lesson extends Component {
       if (currentCaretPos) {
         // The youtube embed code: setting the playist to video id for looping
         const value = `<iframe width="500" height="500" class="ytvideo-embed-iframe" src="https:/www.youtube-nocookie.com/embed/${videoId}?playlist=${videoId}&loop=1&rel=0" frameborder="0" allow="accelerometer; modestbranding; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+        const testVal = '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/gJdeJ1CoFnU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
         editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, value);
+        editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, testVal);
       } else {
         alert("Please Click somewhere in the text first!")
       }
