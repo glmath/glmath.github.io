@@ -83,7 +83,7 @@ tr{
 }
 
 li.nestable-item {
-  padding: 14px 17px;
+  padding: 5px 8px;
   list-style: none;
   background-color: #222222;
   margin: 0px 0px;
@@ -134,4 +134,5 @@ span.ql-formats {
 }
 ol.nestable-list {
   padding: 0px !important;
+  margin: 5px !important;
 }
