@@ -108,8 +108,11 @@ span.ql-formats {
 }
 
 .ql-ytembed:after {
-  content: "Y";
+  content: "🎥";
 }
 .ql-editor {
   font-size: 25px !important;
+}
+.ytp-pause-overlay{
+  display:none !important;
 }

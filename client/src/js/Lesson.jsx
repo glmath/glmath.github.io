@@ -9,6 +9,9 @@ import {
   Link
 } from "react-router-dom";
 
+import getVideoId from 'get-video-id';
+
+
 
 
 class Lesson extends Component {
@@ -68,28 +71,40 @@ class Lesson extends Component {
         historySize: 20 // optional (defaults to 10)
       });
 
-      
-
-      // console.log(this.reactQuill.current.editor);
-      // var toolbar = this.reactQuill.current.editor.getModule('toolbar');
-      // toolbar.addHandler('omega', function () {
-      //   console.log('omega')
-      // });
-
-
-
-      var customButton = document.querySelector('.ql-ytembed');
-      customButton.addEventListener('click', () => {
-        var range = this.reactQuill.current.editor.getSelection();
-        if (range) {
-          this.reactQuill.current.editor.insertText(range.index, "Ω");
-        }
-      });
-
-
+      this.setUpYtEmbed();
       this.haveLoadedQuill = true;
     }
   }
+
+
+  setUpYtEmbed = () => {
+    var customButton = document.querySelector('.ql-ytembed');
+
+    customButton.addEventListener('click', () => {
+
+      let url = prompt("Please Enter a youtube link: ");
+      let ytinfo = getVideoId(url);
+      if (ytinfo.service != "youtube" || ytinfo.id == null) {
+        alert("Please enter a valid Youtube lin");
+        return;
+      }
+      let videoId = ytinfo.id;
+
+      let editor = this.reactQuill.current.editor;
+
+      var currentCaretPos = editor.getSelection();
+      if (currentCaretPos) {
+        // The youtube embed code: setting the playist to video id for looping
+        const value = `<iframe width="500" height="500" class="ytvideo-embed-iframe" src="https:/www.youtube-nocookie.com/embed/${videoId}?playlist=${videoId}&loop=1&rel=0" frameborder="0" allow="accelerometer; modestbranding; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+        editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, value);
+      } else {
+        alert("Please Click somewhere in the text first!")
+      }
+
+    });
+
+  }
+
 
   editorOnChange = (value) => {
 
@@ -159,6 +174,7 @@ class Lesson extends Component {
         });
       });
   }
+
 
   getFromGithub = () => {
     let url = this.props.clientUrl + "/lessons/" + this.props.id + ".json";
