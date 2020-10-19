@@ -105,13 +105,14 @@ class LessonBrowser extends Component {
 
     }
     getFromGithub = () => {
-        let url = this.props.clientUrl + "/lessons/lessontree.json";
+        let url = this.props.clientUrl + "/lessons/lessontree.json?" + Date.now(); // just to override cache
 
         fetch(url, {
             headers: {
               "pragma": "no-cache",
               'Cache-Control': 'no-cache'
-            }
+            },
+            cache: "no-store"
         })
             .then(function (response) {
                 if (response.ok) {
