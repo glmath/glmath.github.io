@@ -170,6 +170,10 @@ function mongoSetUpDone() {
       }
       // console.log("LESSON IN DATA BASE", lesson);
 
+      // name changed so we should recaluate
+      if(lesson.name != req.body.name){
+        shouldRecalculateTree = true;
+      }
       // console.log("lesson parent id vs req parent id", lesson.parentId, req.body.parentId);
       // console.log("databse parent id: ", lesson.parentId, " request parent id", req.body.parentId)
       // check if the parent id changed, if so tell the parent that its no longer a child, and also make sure we dont make ourself the parent

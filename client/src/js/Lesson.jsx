@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 
 import getVideoId from 'get-video-id';
+import EditableText from "./EditableText.jsx";
 
 
 
@@ -107,24 +108,29 @@ class Lesson extends Component {
 
 
   editorOnChange = (value) => {
-
-    // We do not want to constantly save, so only call the server save function after 0.250 seconds of not typing (this is sort of like debounce function from underscore js)
-    clearTimeout(this.state.lastSaveTimeout);
-    let timeout = setTimeout(() => {
-      this.saveToServer(this.state.value);
-    }, 250);
-
-
     // use this temp to update the content field of the serverLesson
     let lesson = this.state.serverLesson;
     lesson.content = this.state.value;
 
     this.setState({
       serverLesson: lesson,
-      lastSaveTimeout: timeout,
       editorState: value,
     });
 
+    this.saveToServerDebounced()
+  }
+
+
+  // We do not want to constantly save, so only call the server save function after 0.250 seconds of not typing (this is sort of like debounce function from underscore js)
+  saveToServerDebounced = () => {
+    clearTimeout(this.state.lastSaveTimeout);
+    let timeout = setTimeout(() => {
+      this.saveToServer();
+    }, 250);
+
+    this.setState({
+      lastSaveTimeout: timeout,
+    });
   }
 
   saveToServer = () => {
@@ -137,6 +143,7 @@ class Lesson extends Component {
       body: JSON.stringify({
         id: this.props.id,
         content: this.state.editorState,
+        name: this.state.serverLesson.name,
       })
     })
   }
@@ -207,6 +214,14 @@ class Lesson extends Component {
 
 
 
+  handleLessonNameChange = (e) =>{
+    let newName = e.target.value;
+    let lesson = this.state.serverLesson;
+    lesson.name = newName;
+    this.setState({serverLesson: lesson});
+    this.saveToServerDebounced();
+  }
+
   render() {
 
     var toolbarOptions = {
@@ -254,7 +269,7 @@ class Lesson extends Component {
 
     return (
       <div>
-        <LessonName name={this.state.serverLesson.name} />
+        <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange}/>
 
 
         <UploadToServerModal
@@ -326,7 +341,7 @@ function Editor(props) {
 }
 
 function LessonName(props) {
-  return <h1> {props.name} </h1>
+  return <h1><EditableText label={props.name} value={props.name} onChange={props.onChange}/> </h1>
 }
 
 function LessonEditor(props) {
