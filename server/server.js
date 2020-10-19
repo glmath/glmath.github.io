@@ -252,7 +252,7 @@ function mongoSetUpDone() {
 
     ExecuteCommand("git add " + filename, (out) => {
       ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
-        ExecuteCommand("git pull && git push", (out) => {
+        ExecuteCommand("git pull --no-edit && git push", (out) => {
           console.log("finished normal commit");
           DoGitResetCycle(id, filename);
         });
