@@ -1,5 +1,5 @@
-import React, {Component} from "react";
-import {Container, Button} from "react-bootstrap";
+import React, { Component } from "react";
+import { Container, Button } from "react-bootstrap";
 import {
   HashRouter,
   Switch,
@@ -21,7 +21,7 @@ const cookies = new Cookies();
 
 class LMath extends Component {
 
-  constructor(props){
+  constructor(props) {
     super(props);
     // TEMP FOR TESTING 
     let admin = cookies.get("isAdmin") == "true";
@@ -31,7 +31,7 @@ class LMath extends Component {
     }
   }
 
-  render(){
+  render() {
     return (
       <Container >
 
@@ -44,42 +44,46 @@ class LMath extends Component {
         }
         }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
 
-      <HashRouter>
-        <Switch>
-          <Route path="/login">
-            <Login url={this.props.url} />
-          </Route>
+        <HashRouter>
+          <Switch>
+            <Route path="/login">
+              <Login url={this.props.url} />
+            </Route>
 
-          <Route path="/create-account">
-            <CreateAccount url={this.props.url}/>
-          </Route>
-          <Route path="/math/:id" children={ <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl}/> }></Route>
+            <Route path="/create-account">
+              <CreateAccount url={this.props.url} />
+            </Route>
+            <Route path="/math/:id" children={
+              <div>
+                <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
+              </div>
+            }></Route>
 
-          <Route path="/browser">
-            <LessonBrowser  url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin}/>
-          </Route>
+            <Route path="/browser">
+              <LessonBrowser url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+            </Route>
 
-          <Route path="/">
-            <Redirect to="/browser" />
-          </Route>
+            <Route path="/">
+              <Redirect to="/browser" />
+            </Route>
 
 
-        </Switch>
+          </Switch>
 
-      </HashRouter>
+        </HashRouter>
 
-    </Container>
+      </Container>
     );
   }
 
 }
 
-function LessonLoader(props){
+function LessonLoader(props) {
   let { id } = useParams();
 
   return (
     <div>
-      <Lesson id={id} url={props.url}  isAdmin={props.isAdmin} clientUrl={props.clientUrl}/>
+      <Lesson id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
     </div>
   );
 }

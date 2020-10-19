@@ -86,8 +86,8 @@ li.nestable-item {
   padding: 14px 17px;
   list-style: none;
   background-color: #222222;
-  margin: 0px 12px;
-  border-left: 8px solid black;
+  margin: 0px 0px;
+  border-left: 3px solid #181818;
 }
 
 
@@ -115,4 +115,7 @@ span.ql-formats {
 }
 .ytp-pause-overlay{
   display:none !important;
+}
+ol.nestable-list {
+  padding: 0px !important;
 }
