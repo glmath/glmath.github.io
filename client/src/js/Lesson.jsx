@@ -67,9 +67,9 @@ class Lesson extends Component {
         ["\\int^{s}_{x}{d}", "\\int"], ["\\binom{n}{k}", "\\binom"]],
 
 
-        displayHistory: true, // defaults to false
-        historyCacheKey: '__my_app_math_history_cachekey_', // optional
-        historySize: 20 // optional (defaults to 10)
+        displayHistory: true,
+        historyCacheKey: '__my_app_math_history_cachekey_',
+        historySize: 20
       });
 
       this.setUpYtEmbed();
@@ -214,11 +214,11 @@ class Lesson extends Component {
 
 
 
-  handleLessonNameChange = (e) =>{
+  handleLessonNameChange = (e) => {
     let newName = e.target.value;
     let lesson = this.state.serverLesson;
     lesson.name = newName;
-    this.setState({serverLesson: lesson});
+    this.setState({ serverLesson: lesson });
     this.saveToServerDebounced();
   }
 
@@ -269,7 +269,7 @@ class Lesson extends Component {
 
     return (
       <div>
-        <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange}/>
+        <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin}/>
 
 
         <UploadToServerModal
@@ -341,7 +341,12 @@ function Editor(props) {
 }
 
 function LessonName(props) {
-  return <h1><EditableText label={props.name} value={props.name} onChange={props.onChange}/> </h1>
+  return <h1><EditableText
+    label={props.name}
+    value={props.name}
+    onChange={props.onChange}
+    readOnly={!props.isAdmin}
+  /> </h1>
 }
 
 function LessonEditor(props) {

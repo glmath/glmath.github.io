@@ -7,6 +7,7 @@ class EditableText extends Component{
     placeholder: "", // placeholder for the input field
     shouldFocus: true, //  whether we want it to auto focus if we are editing
     className: "",
+    readOnly: false,
   }
 
   constructor(props){
@@ -47,7 +48,7 @@ class EditableText extends Component{
   }
 
   render(){
-    if(!this.state.isEditing){
+    if(!this.state.isEditing || this.props.readOnly){
       return (
         <div className={"editable-text-normal " + this.props.className} onClick={() => this.setState({isEditing: true, clicked:  true}) } > 
           {this.props.label}
