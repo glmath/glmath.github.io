@@ -42,7 +42,7 @@ MongoClient.connect(uri, function (err, dbtemp) {
 });
 
 function mongoSetUpDone() {
-  if(process.env.isHeroku == "true"){
+  if (process.env.isHeroku == "true") {
     // this whole proccess is for setting up the git repo in a way we an commit to it
     let gitConfig = ' && git config user.email shahan.neda+glmath@gmail.com && git config --global user.name glMathUpdateBot ';
 
@@ -171,7 +171,7 @@ function mongoSetUpDone() {
       // console.log("LESSON IN DATA BASE", lesson);
 
       // name changed so we should recaluate
-      if(lesson.name != req.body.name){
+      if (lesson.name != req.body.name) {
         shouldRecalculateTree = true;
       }
       // console.log("lesson parent id vs req parent id", lesson.parentId, req.body.parentId);
@@ -215,22 +215,22 @@ function mongoSetUpDone() {
     let id = req.body.id;
     let filename = __dirname + "/../client/lessons/" + id + ".json";
 
-    fs.writeFile(filename, JSON.stringify(req.body), function (err) {
-      if (err) {
-        return console.log(err);
-      }
-      console.log("The file was saved!");
-      commitToGithub(id, filename, () => {
-        // let filename = __dirname + "/../client/lessons/" + "cachefile" + ".json";
-        // fs.writeFile(filename, Date.now(), function (err) {
-        //   commitToGithub(filename, () => {});
-        // });
-      })
-    });
+    lessonsCollection.findOne({ _id: id }, (err, lesson) => {
+      fs.writeFile(filename, JSON.stringify(lesson), function (err) {
+        if (err) {
+          return console.log(err);
+        }
 
-    res.send(JSON.stringify({
-      status: "success",
-    }));
+        console.log("The file was saved!");
+        commitToGithub(id, filename, () => {
+        })
+
+      });
+
+      res.send(JSON.stringify({
+        status: "success",
+      }));
+    });
   });
 
   app.post("/post/lesson-tree-to-github/", (req, res) => {
@@ -252,8 +252,7 @@ function mongoSetUpDone() {
 
     ExecuteCommand("git add " + filename, (out) => {
       ExecuteCommand("git commit -m \"AutoCommit: Changed lesson " + id + "\"", (out) => {
-        console.log("GOT AFTER COMMIT");
-        ExecuteCommand("git push", (out) => {
+        ExecuteCommand("git pull && git push", (out) => {
           console.log("finished normal commit");
           DoGitResetCycle(id, filename);
         });
@@ -284,147 +283,147 @@ function mongoSetUpDone() {
   }
 
   function ExecuteCommand(cmnd, callback) {
-        exec(cmnd, (error, stdout, stderr) => {
-          if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-          }
-          if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-          }
-          console.log(`stdout: ${stdout}`);
-          console.log("GOT HERE FOR comnd, ", cmnd);
-          callback(stdout);
-        });
+    exec(cmnd, (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
       }
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.log("GOT HERE FOR comnd, ", cmnd);
+      callback(stdout);
+    });
+  }
 
   app.post("/post/create/lesson/", (req, res) => {
-        let newLesson = req.body;
-        let parentId = req.body.parentId;
-        console.log("Updating lesson", newLesson.id, " parent,", parentId);
-        if (!newLesson || !parentId || newLesson.id == "" || newLesson.id == undefined || newLesson.id == null) {
-          console.log("ERROR NO LESSON OR PARENT ID");
+    let newLesson = req.body;
+    let parentId = req.body.parentId;
+    console.log("Updating lesson", newLesson.id, " parent,", parentId);
+    if (!newLesson || !parentId || newLesson.id == "" || newLesson.id == undefined || newLesson.id == null) {
+      console.log("ERROR NO LESSON OR PARENT ID");
+    }
+    if (!newLesson || !parentId) {
+      res.status(500).send({});
+      return;
+    }
+    // TODO: Check if id already exists in database and if so return error here
+
+    newLesson["_id"] = newLesson.id;
+    lessonsCollection.insertOne(newLesson);
+
+
+
+
+    // we need to tell the parents of this lesson that we added a new child
+    console.log(parentId);
+    lessonsCollection.findOne({ _id: parentId }, (err, lesson) => {
+      if (err || !lesson) {
+        // console.log(lesson);
+        try {
+          res.send("LESSON PARENT NOT FOUND");
+        } catch {
+
         }
-        if (!newLesson || !parentId) {
-          res.status(500).send({});
-          return;
-        }
-        // TODO: Check if id already exists in database and if so return error here
-
-        newLesson["_id"] = newLesson.id;
-        lessonsCollection.insertOne(newLesson);
-
-
-
-
-        // we need to tell the parents of this lesson that we added a new child
-        console.log(parentId);
-        lessonsCollection.findOne({ _id: parentId }, (err, lesson) => {
-          if (err || !lesson) {
-            // console.log(lesson);
-            try {
-              res.send("LESSON PARENT NOT FOUND");
-            } catch {
-
-            }
-            return;
-          }
-
-          let children = lesson.children;
-          children.push(newLesson.id);
-
-          lessonsCollection.updateOne({ _id: parentId }, { $set: { children: children } }, { upsert: true });
-          res.send({ status: "success" });
-
-        });
-
-
-
-
-        shouldRecalculateTree = true;
-
-      });
-
-
-    app.get('/get/lesson/:id', (req, res) => {
-      lessonsCollection.findOne({ _id: req.params.id }, (err, lesson) => {
-        if (err || lesson == null || lesson == undefined) {
-          res.status(404).send(JSON.stringify({}));
-          return;
-        }
-
-        res.send(JSON.stringify(lesson));
-      });
-    });
-
-    app.get('/get/lesson-tree/:id', (req, res) => {
-
-      if (!shouldRecalculateTree) {
-        res.send(JSON.stringify(cachedLessonTree));
         return;
-      } else {
-        createLessonTree("root", (tree) => {
-          res.send(JSON.stringify(tree));
-        });
       }
+
+      let children = lesson.children;
+      children.push(newLesson.id);
+
+      lessonsCollection.updateOne({ _id: parentId }, { $set: { children: children } }, { upsert: true });
+      res.send({ status: "success" });
+
     });
 
-  app.post("/post/lesson-tree/", (req, res) => {
-        // let tree = req.body;
+
+
+
+    shouldRecalculateTree = true;
 
   });
 
-    async function findLessonFromDatabase(id) {
-      const lesson = await lessonsCollection.findOne({ _id: id })
-      return lesson
-    }
 
-    async function createLessonTree(id, callback) {
-      let root = await findLessonFromDatabase(id);
-      // console.log(root);
-
-      let tree = {
-        id: root.id,
-        name: "Math",
-        children: root.children,
-      };
-
-      let queue = [];
-      queue.push(tree);
-
-      // Do breadth first search to create a tree with all the children in a compact form of name, id, and children. 
-      // it is slightly confusing since the children end up being used as a placeholder for the next layers id's
-      while (queue.length > 0) {
-        numberInLayer = queue.length;
-        for (let k = 0; k < numberInLayer; k++) {
-          let newRoot = queue.shift();
-
-          let childrenIds = newRoot.children;
-          newRoot.children = [];
-
-          for (let i = 0; i < childrenIds.length; i++) {
-            let lesId = childrenIds[i];
-
-            let lesson = await findLessonFromDatabase(lesId);
-            let compact = { id: lesson.id, name: lesson.name, children: lesson.children }; // the lesson.children is just a placeholder used in the next round
-
-            newRoot.children.push(compact); // we add it here to fix it later
-            queue.push(compact);
-
-          }
-        }
+  app.get('/get/lesson/:id', (req, res) => {
+    lessonsCollection.findOne({ _id: req.params.id }, (err, lesson) => {
+      if (err || lesson == null || lesson == undefined) {
+        res.status(404).send(JSON.stringify({}));
+        return;
       }
 
+      res.send(JSON.stringify(lesson));
+    });
+  });
 
-      fs.writeFile(__dirname + "/../client/lessons/lessontree.json", JSON.stringify([tree]), function (err) {
-        console.log(err);
+  app.get('/get/lesson-tree/:id', (req, res) => {
+
+    if (!shouldRecalculateTree) {
+      res.send(JSON.stringify(cachedLessonTree));
+      return;
+    } else {
+      createLessonTree("root", (tree) => {
+        res.send(JSON.stringify(tree));
       });
-      // this is to memonize so we dont have to redo this expensive calculation everytime
-      cachedLessonTree = [tree];
-      shouldRecalculateTree = false;
-      callback([tree]);
+    }
+  });
+
+  app.post("/post/lesson-tree/", (req, res) => {
+    // let tree = req.body;
+
+  });
+
+  async function findLessonFromDatabase(id) {
+    const lesson = await lessonsCollection.findOne({ _id: id })
+    return lesson
+  }
+
+  async function createLessonTree(id, callback) {
+    let root = await findLessonFromDatabase(id);
+    // console.log(root);
+
+    let tree = {
+      id: root.id,
+      name: "Math",
+      children: root.children,
+    };
+
+    let queue = [];
+    queue.push(tree);
+
+    // Do breadth first search to create a tree with all the children in a compact form of name, id, and children. 
+    // it is slightly confusing since the children end up being used as a placeholder for the next layers id's
+    while (queue.length > 0) {
+      numberInLayer = queue.length;
+      for (let k = 0; k < numberInLayer; k++) {
+        let newRoot = queue.shift();
+
+        let childrenIds = newRoot.children;
+        newRoot.children = [];
+
+        for (let i = 0; i < childrenIds.length; i++) {
+          let lesId = childrenIds[i];
+
+          let lesson = await findLessonFromDatabase(lesId);
+          let compact = { id: lesson.id, name: lesson.name, children: lesson.children }; // the lesson.children is just a placeholder used in the next round
+
+          newRoot.children.push(compact); // we add it here to fix it later
+          queue.push(compact);
+
+        }
+      }
     }
 
-    app.use('/', express.static("./"))
+
+    fs.writeFile(__dirname + "/../client/lessons/lessontree.json", JSON.stringify([tree]), function (err) {
+      console.log(err);
+    });
+    // this is to memonize so we dont have to redo this expensive calculation everytime
+    cachedLessonTree = [tree];
+    shouldRecalculateTree = false;
+    callback([tree]);
   }
+
+  app.use('/', express.static("./"))
+}
