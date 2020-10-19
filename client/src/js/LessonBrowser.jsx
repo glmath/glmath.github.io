@@ -108,10 +108,10 @@ class LessonBrowser extends Component {
         let url = this.props.clientUrl + "/lessons/lessontree.json";
 
         fetch(url, {
-            // headers: {
-            //   "pragma": "no-cache",
-            //   'Cache-Control': 'no-cache'
-            // }
+            headers: {
+              "pragma": "no-cache",
+              'Cache-Control': 'no-cache'
+            }
         })
             .then(function (response) {
                 if (response.ok) {
