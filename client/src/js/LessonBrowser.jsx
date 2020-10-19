@@ -196,6 +196,8 @@ class LessonBrowser extends Component {
                         items={this.state.lessonTree}
                         renderItem={LessonListing}
                         onChange={this.lessonTreeNestChange}
+                        collapsed={false}
+                        renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-" }
                     />
                     {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
@@ -214,14 +216,20 @@ class LessonBrowser extends Component {
 
 }
 
+
 // this is a recursive componenet, that recursivly displays its children untill it runs out
 function LessonListing(props) {
     return (
         <div>
             {/* {props} */}
+            <div className="lesson-listing-wrapper">
+            <div className="list-collapse-icon">
+                {props.collapseIcon}
+            </div>
             <Link to={"/math/" + props.item.id}>
                 <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
             </Link>
+            </div>
 
             {/* <ul>
                 {props.lesson.children.map(child => {
