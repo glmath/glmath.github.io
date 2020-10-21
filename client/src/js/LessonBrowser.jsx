@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Container, Modal, Button } from "react-bootstrap";
+
 import {
     HashRouter,
     Switch,
@@ -19,6 +20,7 @@ class LessonBrowser extends Component {
             newLessonInput: "", //
             lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
             showingUploadModal: false,
+            modalContent:"",
         };
         this.updateTreeIfAdmin();
 
@@ -41,7 +43,12 @@ class LessonBrowser extends Component {
     saveLessonToServer = (id, parentId) => {
 
         console.log("telling server to move id", id, " to parent ", parentId);
-        this.setState({showingUploadModal: true});
+        this.setState({
+            showingUploadModal: true,
+            modalContent:"Loading",
+        });
+        // bootbox.alert("Sent to server!");
+       
 
         fetch(this.props.url + "/post/lesson/", {
             method: 'POST',
@@ -131,7 +138,10 @@ class LessonBrowser extends Component {
 
     }
     saveToGithub = () => {
-        this.setState({ showingUploadModal: true });
+        this.setState({ 
+            showingUploadModal: true,
+            modalContent:"This lesson tree has been published to everyone! However it might take a few minutes to show up on the regular website."
+        });
 
         fetch(this.props.url + "/post/lesson-tree-to-github/", {
             method: 'POST',
@@ -143,6 +153,16 @@ class LessonBrowser extends Component {
             })
         })
     }
+
+    // this is to make sure we dont move root or the destination parent
+    nestableConfirmChange = (dragItem, destinationParent) =>{
+        console.log(destinationParent);
+        if (dragItem.id == "root" || destinationParent == null){
+            return false;
+        }
+        return true;
+    }
+
     lessonTreeNestChange = (tree, item) => {
         console.log(JSON.stringify(item));
         console.log(tree);
@@ -188,7 +208,7 @@ class LessonBrowser extends Component {
                             this.setState({ showingUploadModal: true });
                             this.saveToGithub();
                         }}> Publish lesson tree to main site </button>
-                        <UploadToServerModal isShowing={this.state.showingUploadModal} close={() => this.setState({ showingUploadModal: false })} /> </div> : ""
+                        <UploadToServerModal content={this.state.modalContent} isShowing={this.state.showingUploadModal} close={() => this.setState({ showingUploadModal: false })} /> </div> : ""
                     }
 
 
@@ -198,6 +218,7 @@ class LessonBrowser extends Component {
                         onChange={this.lessonTreeNestChange}
                         collapsed={false}
                         renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-" }
+                        confirmChange={this.nestableConfirmChange}
                     />
                     {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
@@ -247,9 +268,13 @@ function UploadToServerModal(props) {
     return (
         <Modal show={props.isShowing} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Published to everyone!</Modal.Title>
+                <Modal.Title></Modal.Title>
             </Modal.Header>
-            <Modal.Body>This lesson tree has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
+            <Modal.Body>
+                {props.content}
+            </Modal.Body>
+
+
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>
