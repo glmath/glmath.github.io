@@ -161,6 +161,10 @@ class LessonBrowser extends Component {
 
     // this is to make sure we dont move root or the destination parent
     nestableConfirmChange = (dragItem, destinationParent) => {
+        if(!this.props.isAdmin){
+            return false;
+        }
+
         if (dragItem.id == "root" || destinationParent == null) {
             return false;
         }
