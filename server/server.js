@@ -161,6 +161,8 @@ function mongoSetUpDone() {
     let id = req.body.id;
     console.log("******* NEW LESSON UPDATE***********");
     console.log("LESOSN BODY ", req.body);
+    let hadToUpdateParent = false;
+
 
     lessonsCollection.findOne({ _id: id }, (err, lesson) => {
       if (err || lesson == undefined || lesson == null) {
@@ -178,6 +180,7 @@ function mongoSetUpDone() {
       // console.log("databse parent id: ", lesson.parentId, " request parent id", req.body.parentId)
       // check if the parent id changed, if so tell the parent that its no longer a child, and also make sure we dont make ourself the parent
       if (lesson.parentId != req.body.parentId && req.body.parentId != undefined && req.body.parentId != req.body.id) {
+        hadToUpdateParent = true;
         shouldRecalculateTree = true;
         // console.log("moving lesson ", id, " to new parent ", req.body.parentId);
 
@@ -203,7 +206,16 @@ function mongoSetUpDone() {
         });
       }
 
+
+
       lessonsCollection.updateOne({ _id: id }, { $set: req.body }, { upsert: true });
+      if (!hadToUpdateParent) {
+        res.json({
+          status: "success",
+        });
+      }
+
+
     });
 
 
@@ -406,12 +418,14 @@ function mongoSetUpDone() {
           let lesId = childrenIds[i];
 
           let lesson = await findLessonFromDatabase(lesId);
-          let compact = { id: lesson.id, name: lesson.name, children: lesson.children }; // the lesson.children is just a placeholder used in the next round
+          let compact = { id: lesson.id, name: lesson.name, children: lesson.children, order: lesson.order, defaultClosed:lesson.defaultClosed }; // the lesson.children is just a placeholder used in the next round
 
           newRoot.children.push(compact); // we add it here to fix it later
           queue.push(compact);
-
         }
+
+        // this just sort and puts in correct order
+        newRoot.children.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0)); 
       }
     }
 
@@ -423,6 +437,7 @@ function mongoSetUpDone() {
     cachedLessonTree = [tree];
     shouldRecalculateTree = false;
     callback([tree]);
+
   }
 
   app.use('/', express.static("./"))

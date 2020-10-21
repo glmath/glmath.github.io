@@ -20,19 +20,19 @@ class LessonBrowser extends Component {
             newLessonInput: "", //
             lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
             showingUploadModal: false,
-            modalContent:"",
+            modalContent: "",
         };
         this.updateTreeIfAdmin();
 
     }
     componentDidMount() {
     }
-    componentDidUpdate(prevProps){
-        if(prevProps.isAdmin != this.props.isAdmin){
+    componentDidUpdate(prevProps) {
+        if (prevProps.isAdmin != this.props.isAdmin) {
             this.updateTreeIfAdmin();
         }
     }
-    updateTreeIfAdmin = () =>{
+    updateTreeIfAdmin = () => {
         if (this.props.isAdmin) {
             this.refreshLessonsFromServer(); // load the lesson tree from the server
         } else {
@@ -40,15 +40,17 @@ class LessonBrowser extends Component {
         }
     }
 
-    saveLessonToServer = (id, parentId) => {
+    saveLessonToServer = (id, parentId, tree, order) => {
 
         console.log("telling server to move id", id, " to parent ", parentId);
         this.setState({
             showingUploadModal: true,
-            modalContent:"Loading",
+            modalContent: "Loading",
+            shouldModalHaveClose: false,
+            // this is temp just while were waiting for the server
+            lessonTree: tree,
         });
-        // bootbox.alert("Sent to server!");
-       
+
 
         fetch(this.props.url + "/post/lesson/", {
             method: 'POST',
@@ -59,14 +61,15 @@ class LessonBrowser extends Component {
             body: JSON.stringify({
                 id: id,
                 parentId: parentId,
+                order: order,
             })
         }).then(response => response.json())
-        .then(data => {
-            if(data != undefined && data.status == "success"){
-                this.setState({showingUploadModal: false});
-                this.refreshLessonsFromServer();
-            }
-        });
+            .then(data => {
+                if (data != undefined && data.status == "success") {
+                    this.setState({});
+                    this.refreshLessonsFromServer();
+                }
+            });
     }
     createNewLesson = () => {
 
@@ -107,6 +110,7 @@ class LessonBrowser extends Component {
             .then(data => {
                 this.setState({
                     lessonTree: data,
+                    showingUploadModal: false 
                 })
             });
 
@@ -116,8 +120,8 @@ class LessonBrowser extends Component {
 
         fetch(url, {
             headers: {
-              "pragma": "no-cache",
-              'Cache-Control': 'no-cache'
+                "pragma": "no-cache",
+                'Cache-Control': 'no-cache'
             },
             cache: "no-store"
         })
@@ -137,10 +141,11 @@ class LessonBrowser extends Component {
             });
 
     }
+
     saveToGithub = () => {
-        this.setState({ 
+        this.setState({
             showingUploadModal: true,
-            modalContent:"This lesson tree has been published to everyone! However it might take a few minutes to show up on the regular website."
+            modalContent: "This lesson tree has been published to everyone! However it might take a few minutes to show up on the regular website."
         });
 
         fetch(this.props.url + "/post/lesson-tree-to-github/", {
@@ -155,49 +160,56 @@ class LessonBrowser extends Component {
     }
 
     // this is to make sure we dont move root or the destination parent
-    nestableConfirmChange = (dragItem, destinationParent) =>{
-        console.log(destinationParent);
-        if (dragItem.id == "root" || destinationParent == null){
+    nestableConfirmChange = (dragItem, destinationParent) => {
+        if (dragItem.id == "root" || destinationParent == null) {
             return false;
         }
         return true;
     }
 
     lessonTreeNestChange = (tree, item) => {
-        console.log(JSON.stringify(item));
-        console.log(tree);
 
         // bfs to look for parent 
         let queue = [];
         queue.push(tree[0]);
         let parentId = null
-        while(queue.length > 0){
+        let parentElementObject = null;
+
+        while (queue.length > 0) {
             let poppedItem = queue.pop();
-            if(poppedItem.children.length < 1){
+            if (poppedItem.children.length < 1) {
                 continue;
             }
             queue.push(...poppedItem.children);
             // if this current node has the item we want as a child, then it must be the parerent so we save that
             let searchItem = poppedItem.children.find(i => item.id === i.id);
 
-            if(searchItem != undefined && searchItem != null){
-                console.log("FOUND", searchItem);
+            if (searchItem != undefined && searchItem != null) {
                 parentId = poppedItem.id; // we have it as a child so must be parent
+                parentElementObject = poppedItem;
                 break;
             }
         }
 
-        if(parentId != null){
-            this.saveLessonToServer(item.id, parentId);
-        }else{
+
+
+        let indexOfMovedElementInChildren = parentElementObject.children.indexOf(item);
+
+        if (parentId != null) {
+            // to set order, send request for each child with correct ordere
+            for( let i = 0; i < parentElementObject.children.length; i++ ){
+                // TODO: to optimize this, make it so it doesnt update the parnet id on the server
+                this.saveLessonToServer(parentElementObject.children[i].id, parentElementObject.id, tree, i);
+            }
+
+        } else {
             console.error("Parent not found!");
         }
-        
+
 
     }
 
     render() {
-        console.log(this.state.lessonTree)
         return (
             <div>
                 Lesson Browser
@@ -208,7 +220,12 @@ class LessonBrowser extends Component {
                             this.setState({ showingUploadModal: true });
                             this.saveToGithub();
                         }}> Publish lesson tree to main site </button>
-                        <UploadToServerModal content={this.state.modalContent} isShowing={this.state.showingUploadModal} close={() => this.setState({ showingUploadModal: false })} /> </div> : ""
+                        <UploadToServerModal
+                            closeButton={this.state.shouldModalHaveClose}
+                            content={this.state.modalContent}
+                            isShowing={this.state.showingUploadModal}
+                            close={() => this.setState({ showingUploadModal: false })}
+                        /> </div> : ""
                     }
 
 
@@ -217,7 +234,7 @@ class LessonBrowser extends Component {
                         renderItem={LessonListing}
                         onChange={this.lessonTreeNestChange}
                         collapsed={false}
-                        renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-" }
+                        renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
                         confirmChange={this.nestableConfirmChange}
                     />
                     {/* {<LessonListing lesson={this.state.lessonTree} />} */}
@@ -244,12 +261,12 @@ function LessonListing(props) {
         <div>
             {/* {props} */}
             <div className="lesson-listing-wrapper">
-            <div className="list-collapse-icon">
-                {props.collapseIcon}
-            </div>
-            <Link to={"/math/" + props.item.id}>
-                <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
-            </Link>
+                <div className="list-collapse-icon">
+                    {props.collapseIcon}
+                </div>
+                <Link to={"/math/" + props.item.id}>
+                    <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
+                </Link>
             </div>
 
             {/* <ul>
@@ -261,25 +278,26 @@ function LessonListing(props) {
     )
 }
 
-function UploadToServerModal(props) {
+function UploadToServerModal({ close, isShowing, content, closeButton = true}) {
 
-    const handleClose = () => props.close();
+    const handleClose = () => close();
 
     return (
-        <Modal show={props.isShowing} onHide={handleClose}>
+        <Modal show={isShowing} onHide={handleClose}>
             <Modal.Header closeButton>
                 <Modal.Title></Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {props.content}
+                {content}
             </Modal.Body>
 
 
 
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Close
-          </Button>
+                {closeButton ?
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                </Button> : ""}
             </Modal.Footer>
         </Modal>
     );
