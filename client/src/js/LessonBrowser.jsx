@@ -109,7 +109,9 @@ class LessonBrowser extends Component {
 
             .then(data => {
                 this.setState({
-                    lessonTree: data,
+
+                    // we dont really want the root to display
+                    lessonTree: data[0].children,
                     showingUploadModal: false 
                 })
             });
@@ -133,7 +135,8 @@ class LessonBrowser extends Component {
             })
             .then(function (data) {
                 this.setState({
-                    lessonTree: data,
+                    // we dont really want the root to display
+                    lessonTree: data[0].children,
                 });
             }.bind(this))
             .catch(function (err) {
@@ -165,13 +168,14 @@ class LessonBrowser extends Component {
             return false;
         }
 
-        if (dragItem.id == "root" || destinationParent == null) {
-            return false;
-        }
+        // if (dragItem.id == "root" || destinationParent == null) {
+        //     return false;
+        // }
         return true;
     }
 
     lessonTreeNestChange = (tree, item) => {
+
 
         // bfs to look for parent 
         let queue = [];
@@ -196,16 +200,21 @@ class LessonBrowser extends Component {
         }
 
 
+        if(parentId == null){
+            parentId = "root";
+        }
 
-        let indexOfMovedElementInChildren = parentElementObject.children.indexOf(item);
-
+        let arrayOfChildren = tree;
+        if(parentId !== "root"){
+            arrayOfChildren = parentElementObject.children;
+        }
+        
         if (parentId != null) {
             // to set order, send request for each child with correct ordere
-            for( let i = 0; i < parentElementObject.children.length; i++ ){
+            for( let i = 0; i < arrayOfChildren.length; i++ ){
                 // TODO: to optimize this, make it so it doesnt update the parnet id on the server
-                this.saveLessonToServer(parentElementObject.children[i].id, parentElementObject.id, tree, i);
+                this.saveLessonToServer(arrayOfChildren[i].id, parentId, tree, i);
             }
-
         } else {
             console.error("Parent not found!");
         }
@@ -237,7 +246,7 @@ class LessonBrowser extends Component {
                         items={this.state.lessonTree}
                         renderItem={LessonListing}
                         onChange={this.lessonTreeNestChange}
-                        collapsed={false}
+                        collapsed={true}
                         renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
                         confirmChange={this.nestableConfirmChange}
                     />
