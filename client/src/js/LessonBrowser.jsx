@@ -179,7 +179,8 @@ class LessonBrowser extends Component {
 
         // bfs to look for parent 
         let queue = [];
-        queue.push(tree[0]);
+        // push all the elements of it to the back of the queue
+        queue.push(...tree);
         let parentId = null
         let parentElementObject = null;
 
@@ -200,12 +201,14 @@ class LessonBrowser extends Component {
         }
 
 
+        console.log("Found parent: ", parentId);
         if(parentId == null){
             parentId = "root";
         }
 
         let arrayOfChildren = tree;
-        if(parentId !== "root"){
+        if(parentId != "root"){
+            console.log("setting to the actualyl children");
             arrayOfChildren = parentElementObject.children;
         }
         
