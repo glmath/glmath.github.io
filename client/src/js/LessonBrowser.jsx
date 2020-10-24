@@ -283,6 +283,7 @@ class LessonBrowser extends Component {
 
 // this is a recursive componenet, that recursivly displays its children untill it runs out
 function LessonListing(props) {
+    // TODO: inorder to find if were selected, parse the url our self
     return (
         <div>
             {/* {props} */}
