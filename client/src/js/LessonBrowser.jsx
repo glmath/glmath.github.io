@@ -7,7 +7,7 @@ import {
     Route,
     Link,
     Redirect,
-    useParams,
+    withRouter,
 } from "react-router-dom";
 import Nestable from 'react-nestable';
 
@@ -15,7 +15,6 @@ class LessonBrowser extends Component {
 
     constructor(props) {
         super(props);
-
         this.state = {
             newLessonInput: "", //
             lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
@@ -27,7 +26,16 @@ class LessonBrowser extends Component {
     }
     componentDidMount() {
     }
+
+    setNewrootFromOldTree = () => {
+
+
+    }
+
     componentDidUpdate(prevProps) {
+        console.log("MATH ", this.props.match.params.id)
+        this.refNestable.collapse([this.props.match.params.id]);
+
         if (prevProps.isAdmin != this.props.isAdmin) {
             this.updateTreeIfAdmin();
         }
@@ -249,9 +257,10 @@ class LessonBrowser extends Component {
                             items={this.state.lessonTree}
                             renderItem={LessonListing}
                             onChange={this.lessonTreeNestChange}
-                            collapsed={true}
+                            collapsed={this.props.defaultCollapsed}
                             renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
                             confirmChange={this.nestableConfirmChange}
+                            ref={el => this.refNestable = el}
                         />
                         {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
@@ -321,4 +330,4 @@ function UploadToServerModal({ close, isShowing, content, closeButton = true }) 
 }
 
 
-export default LessonBrowser;
+export default withRouter(LessonBrowser);

@@ -47,7 +47,7 @@ class LMath extends Component {
             </Route>
             <Route path="/math/:id" children={
               <div className="lesson-page-wrapper row">
-                <LessonBrowser className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+                <LessonBrowser defaultCollapsed={false} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
                 <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
               </div>
             }></Route>
@@ -61,7 +61,7 @@ class LMath extends Component {
                 // window.location.reload(); 
               }
               }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
-              <LessonBrowser url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+              <LessonBrowser defaultCollapsed={true} url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
             </Route>
 
             <Route path="/">
