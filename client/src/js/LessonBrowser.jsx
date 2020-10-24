@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container, Modal, Button } from "react-bootstrap";
+import { Container, Modal, Button, ButtonGroup } from "react-bootstrap";
 
 import {
     HashRouter,
@@ -112,7 +112,7 @@ class LessonBrowser extends Component {
 
                     // we dont really want the root to display
                     lessonTree: data[0].children,
-                    showingUploadModal: false 
+                    showingUploadModal: false
                 })
             });
 
@@ -164,7 +164,7 @@ class LessonBrowser extends Component {
 
     // this is to make sure we dont move root or the destination parent
     nestableConfirmChange = (dragItem, destinationParent) => {
-        if(!this.props.isAdmin){
+        if (!this.props.isAdmin) {
             return false;
         }
 
@@ -202,19 +202,19 @@ class LessonBrowser extends Component {
 
 
         console.log("Found parent: ", parentId);
-        if(parentId == null){
+        if (parentId == null) {
             parentId = "root";
         }
 
         let arrayOfChildren = tree;
-        if(parentId != "root"){
+        if (parentId != "root") {
             console.log("setting to the actualyl children");
             arrayOfChildren = parentElementObject.children;
         }
-        
+
         if (parentId != null) {
             // to set order, send request for each child with correct ordere
-            for( let i = 0; i < arrayOfChildren.length; i++ ){
+            for (let i = 0; i < arrayOfChildren.length; i++) {
                 // TODO: to optimize this, make it so it doesnt update the parnet id on the server
                 this.saveLessonToServer(arrayOfChildren[i].id, parentId, tree, i);
             }
@@ -227,33 +227,34 @@ class LessonBrowser extends Component {
 
     render() {
         return (
-            <div>
-                Lesson Browser
+            <div className="lesson-browser-wrapper">
                 <div className="lesson-links">
+                    <ButtonGroup>
 
-                    {this.props.isAdmin ? <div>
-                        <button onClick={() => {
-                            this.setState({ showingUploadModal: true });
-                            this.saveToGithub();
-                        }}> Publish lesson tree to main site </button>
-                        <UploadToServerModal
-                            closeButton={this.state.shouldModalHaveClose}
-                            content={this.state.modalContent}
-                            isShowing={this.state.showingUploadModal}
-                            close={() => this.setState({ showingUploadModal: false })}
-                        /> </div> : ""
-                    }
+                        {this.props.isAdmin ? <div>
+                            <button onClick={() => {
+                                this.setState({ showingUploadModal: true });
+                                this.saveToGithub();
+                            }}> Publish lesson tree to main site </button>
+                            <UploadToServerModal
+                                closeButton={this.state.shouldModalHaveClose}
+                                content={this.state.modalContent}
+                                isShowing={this.state.showingUploadModal}
+                                close={() => this.setState({ showingUploadModal: false })}
+                            /> </div> : ""
+                        }
+                    </ButtonGroup>
 
+                        <Nestable
+                            items={this.state.lessonTree}
+                            renderItem={LessonListing}
+                            onChange={this.lessonTreeNestChange}
+                            collapsed={true}
+                            renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
+                            confirmChange={this.nestableConfirmChange}
+                        />
+                        {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
-                    <Nestable
-                        items={this.state.lessonTree}
-                        renderItem={LessonListing}
-                        onChange={this.lessonTreeNestChange}
-                        collapsed={true}
-                        renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
-                        confirmChange={this.nestableConfirmChange}
-                    />
-                    {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
                     <input type="text"
                         value={this.state.newLessonInput}
@@ -276,7 +277,7 @@ function LessonListing(props) {
     return (
         <div>
             {/* {props} */}
-            <div className="lesson-listing-wrapper">
+            <div className={"lesson-listing-wrapper " + (props.isSelected ? "lesson-listing-selected" : "")}  >
                 <div className="list-collapse-icon">
                     {props.collapseIcon}
                 </div>
@@ -294,7 +295,7 @@ function LessonListing(props) {
     )
 }
 
-function UploadToServerModal({ close, isShowing, content, closeButton = true}) {
+function UploadToServerModal({ close, isShowing, content, closeButton = true }) {
 
     const handleClose = () => close();
 

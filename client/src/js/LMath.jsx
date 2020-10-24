@@ -33,16 +33,8 @@ class LMath extends Component {
 
   render() {
     return (
-      <Container >
+      <Container fluid>
 
-        <Button variant="dark" onClick={() => {
-          cookies.set("isAdmin", !this.state.isAdmin ? "true" : "false");
-          this.setState({
-            isAdmin: !this.state.isAdmin,
-          })
-          // window.location.reload(); 
-        }
-        }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
 
         <HashRouter>
           <Switch>
@@ -54,12 +46,21 @@ class LMath extends Component {
               <CreateAccount url={this.props.url} />
             </Route>
             <Route path="/math/:id" children={
-              <div>
+              <div className="lesson-page-wrapper row">
+                <LessonBrowser className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
                 <LessonLoader isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
               </div>
             }></Route>
 
             <Route path="/browser">
+              <Button variant="dark" onClick={() => {
+                cookies.set("isAdmin", !this.state.isAdmin ? "true" : "false");
+                this.setState({
+                  isAdmin: !this.state.isAdmin,
+                })
+                // window.location.reload(); 
+              }
+              }>Admin {this.state.isAdmin ? "yes" : "no"}</Button>
               <LessonBrowser url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
             </Route>
 
@@ -82,8 +83,8 @@ function LessonLoader(props) {
   let { id } = useParams();
 
   return (
-    <div>
-      <Lesson id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
+    <div className="lesson-loader-wrapper col-9">
+      <Lesson key={id} id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
     </div>
   );
 }
