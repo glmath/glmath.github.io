@@ -30,6 +30,7 @@ class LessonBrowser extends Component {
 
     setNewrootFromOldTree = (newRootId) => {
         let newRootElement = this.findElementInTreeWithId(newRootId);
+        console.log("new root elemnt", newRootElement);
         if (newRootElement == null || newRootId == null || newRootId == "") {
             this.setState({
                 lessonTree: this.state.fullTree,
@@ -92,6 +93,13 @@ class LessonBrowser extends Component {
     }
 
     goUpButtonClicked = () => {
+        let parent = this.findParentFromChildIdInTree(this.state.lessonTree[0].id, this.state.fullTree);
+        console.log("found parent", parent, "for child", this.state.lessonTree[0].id);
+        if(parent == null){
+            this.setNewrootFromOldTree("root")
+        }else{
+            this.setNewrootFromOldTree(parent.id);
+        }
     }
 
     saveLessonToServer = (id, parentId, tree, order) => {
