@@ -299,9 +299,9 @@ class Lesson extends Component {
           isShowing={this.state.showingUploadModal}
           close={() => this.setState({ showingUploadModal: false })} />
 
-        <Link to={"../browser"}>
+        {/* <Link to={"../browser"}>
           <Button variant="dark" >Back</Button>
-        </Link>
+        </Link> */}
 
 
 

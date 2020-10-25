@@ -65,7 +65,7 @@ class LMath extends Component {
             </Route>
 
             <Route path="/">
-              <Redirect to="/browser" />
+              <Redirect to="/math/root" />
             </Route>
 
 
