@@ -42,15 +42,10 @@ class Lesson extends Component {
     // update with inital data from the server
     if (this.props.isAdmin) {
 
-      //only for local testing ( since locally we cant make cross origin request to github servers)
-      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      //(since locally we cant make cross origin request to github servers, sometimes the first migh give error but it still calls the callback)
+      this.getFromGithub(() => {
         this.getFromServer();
-      } else {
-        // first get from github so we see last updated time
-        this.getFromGithub(() => {
-          this.getFromServer();
-        });
-      }
+      });
 
     } else {
       this.getFromGithub();
@@ -182,9 +177,7 @@ class Lesson extends Component {
         lastUpdated: Date.now(),
       })
     }).then(() => {
-
-
-
+      this.getFromGithub();
     });
   }
 
@@ -235,6 +228,7 @@ class Lesson extends Component {
       }.bind(this))
       .catch(function (err) {
         console.log("failed to load ", url, err.message);
+        callback();
       });
 
   }
@@ -294,18 +288,10 @@ class Lesson extends Component {
     }
 
 
-    let ourLastUpdatedTime = this.state.serverLesson.lastUpdated;
-    let githubLastUpdated = this.state.githubLastUpdated;
-    console.log(ourLastUpdatedTime, githubLastUpdated, ourLastUpdatedTime==githubLastUpdated);
     return (
       <div>
         <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin} />
 
-        {ourLastUpdatedTime != githubLastUpdated ? 
-            <Alert  variant={'danger'}>
-              This lesson has been saved, howerver your changes are not on the public website. When you are ready, Click <b>Publish</b> to publish them to the main website!
-          </Alert>: ""
-        }
 
 
 
@@ -320,6 +306,13 @@ class Lesson extends Component {
 
 
         {this.props.isAdmin ? <div>
+
+          {(this.state.serverLesson.lastUpdated != this.state.githubLastUpdated ? 
+            <Alert  variant={'danger'}>
+              This lesson has been saved, howerver your changes are not on the public website. When you are ready, Click <b>Publish</b> to publish them to the main website!
+          </Alert>: "")}
+
+
           <Button variant="dark" onClick={() => {
             this.saveToGithub();
           }
