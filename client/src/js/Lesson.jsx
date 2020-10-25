@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import mathquill4quill from 'mathquill4quill';
 import 'mathquill4quill/mathquill4quill.css';
 import React, { Component, useState } from "react";
-import { Button, Modal, Spinner } from "react-bootstrap";
+import { Button, Modal, Spinner, Alert } from "react-bootstrap";
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import {
@@ -41,7 +41,17 @@ class Lesson extends Component {
   checkFromServerDependingOnAdmin = () => {
     // update with inital data from the server
     if (this.props.isAdmin) {
-      this.getFromServer();
+
+      //only for local testing ( since locally we cant make cross origin request to github servers)
+      if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+        this.getFromServer();
+      } else {
+        // first get from github so we see last updated time
+        this.getFromGithub(() => {
+          this.getFromServer();
+        });
+      }
+
     } else {
       this.getFromGithub();
     }
@@ -136,6 +146,12 @@ class Lesson extends Component {
   }
 
   saveToServer = () => {
+    let lastUpdated = Date.now();
+    let oldLesson = this.state.serverLesson;
+    oldLesson.lastUpdated = lastUpdated;
+    this.setState({serverLesson: oldLesson});
+
+
     fetch(this.props.url + "/post/lesson/", {
       method: 'POST',
       headers: {
@@ -146,6 +162,7 @@ class Lesson extends Component {
         id: this.props.id,
         content: this.state.editorState,
         name: this.state.serverLesson.name,
+        lastUpdated: lastUpdated,
       })
     })
   }
@@ -162,8 +179,13 @@ class Lesson extends Component {
       body: JSON.stringify({
         id: this.props.id,
         content: this.state.editorState,
+        lastUpdated: Date.now(),
       })
-    })
+    }).then(() => {
+
+
+
+    });
   }
 
   // Old way of getting from database
@@ -185,7 +207,7 @@ class Lesson extends Component {
   }
 
 
-  getFromGithub = () => {
+  getFromGithub = (callback) => {
     let url = this.props.clientUrl + "/lessons/" + this.props.id + ".json";
 
     fetch(url, {
@@ -207,7 +229,9 @@ class Lesson extends Component {
         this.setState({
           serverLesson: data,
           editorState: data.content,
+          githubLastUpdated: data.lastUpdated,
         });
+        callback();
       }.bind(this))
       .catch(function (err) {
         console.log("failed to load ", url, err.message);
@@ -226,6 +250,15 @@ class Lesson extends Component {
   }
 
   render() {
+
+    // if we have not loaded yet, display spinner
+    if (this.state.serverLesson == null) {
+      return (
+        <Spinner className="spinner" animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      );
+    }
 
     var toolbarOptions = {
       container: [
@@ -261,18 +294,19 @@ class Lesson extends Component {
     }
 
 
-    // if we have not loaded yet, display spinner
-    if (this.state.serverLesson == null) {
-      return (
-        <Spinner className="spinner" animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner>
-      );
-    }
-
+    let ourLastUpdatedTime = this.state.serverLesson.lastUpdated;
+    let githubLastUpdated = this.state.githubLastUpdated;
+    console.log(ourLastUpdatedTime, githubLastUpdated, ourLastUpdatedTime==githubLastUpdated);
     return (
       <div>
-        <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin}/>
+        <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin} />
+
+        {ourLastUpdatedTime != githubLastUpdated ? 
+            <Alert  variant={'danger'}>
+              This lesson has been saved, howerver your changes are not on the public website. When you are ready, Click <b>Publish</b> to publish them to the main website!
+          </Alert>: ""
+        }
+
 
 
         <UploadToServerModal

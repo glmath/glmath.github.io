@@ -399,6 +399,7 @@ function mongoSetUpDone() {
       id: root.id,
       name: "Math",
       children: root.children,
+      lastUpdated: Date.now(),
     };
 
     let queue = [];
