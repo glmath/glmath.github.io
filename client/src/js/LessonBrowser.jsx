@@ -324,7 +324,7 @@ class LessonBrowser extends Component {
                     <ButtonGroup>
                         <Button className="btn-submit btn go-up-button" onClick={this.goUpButtonClicked}>Up </Button>
 
-                        {this.props.isAdmin ? <div>
+                        {this.props.isAdmin ? <>
                             <Button className="btn-info btn" onClick={() => {
                                 this.setState({ showingUploadModal: true });
                                 this.saveToGithub();
@@ -334,9 +334,12 @@ class LessonBrowser extends Component {
                                 content={this.state.modalContent}
                                 isShowing={this.state.showingUploadModal}
                                 close={() => this.setState({ showingUploadModal: false })}
-                            /> </div> : ""
-                        }
+                            /> 
+                            
                         <Button className="btn-success btn create-lesson-button" onClick={this.createNewLesson}>New</Button>
+                            
+                            </> : ""
+                        }
                     </ButtonGroup>
 
                     <Nestable
