@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Container, Modal, Button, ButtonGroup } from "react-bootstrap";
+import { v4 as uuidv4 } from 'uuid';
 
 import {
     HashRouter,
@@ -135,11 +136,26 @@ class LessonBrowser extends Component {
     }
     createNewLesson = () => {
 
-        let lessonName = this.state.newLessonInput;
-        // create lesson id using time and name
-        let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
+        let lessonName = prompt("Enter new lesson name: ");
+        if (lessonName == null) {
+            return;
+        }
 
-        // send request to server to create new lesson
+
+        let parentId = "root";
+        let parentOfTopLesson = this.findParentFromChildIdInTree(this.state.lessonTree[0].id, this.state.fullTree);
+        if (this.state.lessonTree.length == 1) { // we are in one of the child lessons, so set the parent to that
+            parentId = this.state.lessonTree[0].id;
+        }
+
+
+        console.log(parentId);
+        // create lesson id using time and name
+        // let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
+
+        let lessonId = uuidv4();
+
+        // // send request to server to create new lesson
         fetch(this.props.url + "/post/create/lesson/", {
             method: 'POST',
             headers: {
@@ -150,7 +166,7 @@ class LessonBrowser extends Component {
                 id: lessonId,
                 name: lessonName,
                 content: "",
-                parentId: "root",
+                parentId: parentId,
                 children: [],
             })
         }).then(() => {
@@ -306,9 +322,10 @@ class LessonBrowser extends Component {
             <div className="lesson-browser-wrapper">
                 <div className="lesson-links">
                     <ButtonGroup>
+                        <Button className="btn-submit btn go-up-button" onClick={this.goUpButtonClicked}>Up </Button>
 
                         {this.props.isAdmin ? <div>
-                            <Button className="btn-submit btn" onClick={() => {
+                            <Button className="btn-info btn" onClick={() => {
                                 this.setState({ showingUploadModal: true });
                                 this.saveToGithub();
                             }}> Publish lesson tree to main site </Button>
@@ -319,7 +336,7 @@ class LessonBrowser extends Component {
                                 close={() => this.setState({ showingUploadModal: false })}
                             /> </div> : ""
                         }
-                        <Button className="btn-submit btn go-up-button" onClick={this.goUpButtonClicked}>Up </Button>
+                        <Button className="btn-success btn create-lesson-button" onClick={this.createNewLesson}>New</Button>
                     </ButtonGroup>
 
                     <Nestable
@@ -334,11 +351,6 @@ class LessonBrowser extends Component {
                     {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
 
-                    <input type="text"
-                        value={this.state.newLessonInput}
-                        onChange={(e) => this.setState({ newLessonInput: e.target.value })} />
-
-                    <button onClick={this.createNewLesson}> create </button>
 
                 </div>
 
@@ -358,23 +370,18 @@ function LessonListing(props) {
 
 
     return (
-        <div>
-            {/* {props} */}
-            <Link to={"/math/" + props.item.id}>
-            <div className={"lesson-listing-wrapper " + (id == props.item.id ? "lesson-listing-selected" : "")}  >
-                <div className="list-collapse-icon">
-                    {props.collapseIcon}
-                </div>
-                <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
+
+        <div className={"lesson-listing-wrapper" + (id == props.item.id ? " lesson-listing-selected" : "")}>
+            <div className="list-collapse-icon">
+                {props.collapseIcon}
             </div>
 
+            <Link className={"lesson-listing-link-wrapper"  } to={"/math/" + props.item.id}>
+                    <div className={"lesson-listing-name"}  >
+                        <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
+                    </div>
             </Link>
 
-            {/* <ul>
-                {props.lesson.children.map(child => {
-                    return (<LessonListing key={child.id} lesson={child} />);
-                })}
-            </ul> */}
         </div >
     )
 }
