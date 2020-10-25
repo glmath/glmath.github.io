@@ -17,7 +17,8 @@ class LessonBrowser extends Component {
         super(props);
         this.state = {
             newLessonInput: "", //
-            lessonTree: [{ id: '', name: '' }], // where the lesson tree is storeed
+            lessonTree: [{ id: '', name: '' }], // this tree can be reduced depending on the selection
+            fullTree: [{ id: '', name: '' }], // this cannot be reduced any further
             showingUploadModal: false,
             modalContent: "",
         };
@@ -27,14 +28,56 @@ class LessonBrowser extends Component {
     componentDidMount() {
     }
 
-    setNewrootFromOldTree = () => {
+    setNewrootFromOldTree = (newRootId) => {
+        let newRootElement = this.findElementInTreeWithId(newRootId);
+        if (newRootElement == null || newRootId == null || newRootId == "") {
+            this.setState({
+                lessonTree: this.state.fullTree,
+            })
+            return;
+        }
+
+        this.setState({
+            lessonTree: [newRootElement],
+        })
+    }
 
 
+    findElementInTreeWithId = (id) => {
+        // do a modified bfs/dps
+        let stack = [];
+        stack.push(...this.state.fullTree);
+        while (stack.length > 0) {
+            let element = stack.pop();
+
+            if (element.id == id) {
+                return element;
+            }
+
+            if (element.children && element.children.length > 0) {
+                stack.push(...element.children);
+            }
+        }
+    }
+    setCorrectTreeRoot = () =>{
+        let currentElement = this.findElementInTreeWithId(this.props.match.params.id);
+        if(currentElement.children.length > 0){
+            this.setNewrootFromOldTree(currentElement.id);
+        }else{
+            let parent = this.findParentFromChildIdInTree(this.props.match.params.id, this.state.fullTree);
+            if(parent == null){
+                this.setNewrootFromOldTree("root")
+            }else{
+                this.setNewrootFromOldTree(parent.id);
+            }
+        }
     }
 
     componentDidUpdate(prevProps) {
-        console.log("MATH ", this.props.match.params.id)
-        this.refNestable.collapse([this.props.match.params.id]);
+        if (prevProps == this.props) {
+            return;
+        }
+        this.setCorrectTreeRoot();
 
         if (prevProps.isAdmin != this.props.isAdmin) {
             this.updateTreeIfAdmin();
@@ -46,6 +89,9 @@ class LessonBrowser extends Component {
         } else {
             this.getFromGithub();
         }
+    }
+
+    goUpButtonClicked = () => {
     }
 
     saveLessonToServer = (id, parentId, tree, order) => {
@@ -120,8 +166,10 @@ class LessonBrowser extends Component {
 
                     // we dont really want the root to display
                     lessonTree: data[0].children,
+                    fullTree: data[0].children,
                     showingUploadModal: false
                 })
+                this.setCorrectTreeRoot();
             });
 
     }
@@ -145,7 +193,9 @@ class LessonBrowser extends Component {
                 this.setState({
                     // we dont really want the root to display
                     lessonTree: data[0].children,
+                    fullTree: data[0].children,
                 });
+                setCorrectTreeRoot();
             }.bind(this))
             .catch(function (err) {
                 console.log("failed to load ", url, err.message);
@@ -182,9 +232,10 @@ class LessonBrowser extends Component {
         return true;
     }
 
-    lessonTreeNestChange = (tree, item) => {
-
-
+    findParentFromChildIdInTree = (id, tree) => {
+        if (tree == null) {
+            tree = this.state.fullTree;
+        }
         // bfs to look for parent 
         let queue = [];
         // push all the elements of it to the back of the queue
@@ -199,7 +250,7 @@ class LessonBrowser extends Component {
             }
             queue.push(...poppedItem.children);
             // if this current node has the item we want as a child, then it must be the parerent so we save that
-            let searchItem = poppedItem.children.find(i => item.id === i.id);
+            let searchItem = poppedItem.children.find(i => id === i.id);
 
             if (searchItem != undefined && searchItem != null) {
                 parentId = poppedItem.id; // we have it as a child so must be parent
@@ -208,11 +259,20 @@ class LessonBrowser extends Component {
             }
         }
 
+        return parentElementObject;
 
-        console.log("Found parent: ", parentId);
-        if (parentId == null) {
-            parentId = "root";
+    }
+    lessonTreeNestChange = (tree, item) => {
+
+
+        let parentElementObject = this.findParentFromChildIdInTree(item.id, tree);
+        let parentId = "root";
+        if (parentElementObject != null) {
+            parentId = parentElementObject.id;
         }
+
+        console.log("FOUND PARENT OBJECT ", parentElementObject);
+        console.log("parent id is", parentId);
 
         let arrayOfChildren = tree;
         if (parentId != "root") {
@@ -240,10 +300,10 @@ class LessonBrowser extends Component {
                     <ButtonGroup>
 
                         {this.props.isAdmin ? <div>
-                            <button onClick={() => {
+                            <Button className="btn-submit btn" onClick={() => {
                                 this.setState({ showingUploadModal: true });
                                 this.saveToGithub();
-                            }}> Publish lesson tree to main site </button>
+                            }}> Publish lesson tree to main site </Button>
                             <UploadToServerModal
                                 closeButton={this.state.shouldModalHaveClose}
                                 content={this.state.modalContent}
@@ -251,18 +311,19 @@ class LessonBrowser extends Component {
                                 close={() => this.setState({ showingUploadModal: false })}
                             /> </div> : ""
                         }
+                        <Button className="btn-submit btn go-up-button" onClick={this.goUpButtonClicked}>Up </Button>
                     </ButtonGroup>
 
-                        <Nestable
-                            items={this.state.lessonTree}
-                            renderItem={LessonListing}
-                            onChange={this.lessonTreeNestChange}
-                            collapsed={this.props.defaultCollapsed}
-                            renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
-                            confirmChange={this.nestableConfirmChange}
-                            ref={el => this.refNestable = el}
-                        />
-                        {/* {<LessonListing lesson={this.state.lessonTree} />} */}
+                    <Nestable
+                        items={this.state.lessonTree}
+                        renderItem={LessonListing}
+                        onChange={this.lessonTreeNestChange}
+                        collapsed={this.props.defaultCollapsed}
+                        renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
+                        confirmChange={this.nestableConfirmChange}
+                        ref={el => this.refNestable = el}
+                    />
+                    {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 
 
                     <input type="text"
@@ -281,9 +342,17 @@ class LessonBrowser extends Component {
 }
 
 
-// this is a recursive componenet, that recursivly displays its children untill it runs out
 function LessonListing(props) {
     // TODO: inorder to find if were selected, parse the url our self
+
+    const params = new URLSearchParams(window.location.search);
+    let treeRoot = params.get('treeRoot'); // bar
+    if(treeRoot == null){
+        treeRoot = "";
+    }
+
+    let extraQuery = "?treeRoot=" + ((props.item.children.length > 0) ? props.item.id : treeRoot);
+
     return (
         <div>
             {/* {props} */}
@@ -291,7 +360,7 @@ function LessonListing(props) {
                 <div className="list-collapse-icon">
                     {props.collapseIcon}
                 </div>
-                <Link to={"/math/" + props.item.id}>
+                <Link to={"/math/" + props.item.id + extraQuery }>
                     <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
                 </Link>
             </div>

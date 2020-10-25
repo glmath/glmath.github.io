@@ -141,6 +141,7 @@ ol.nestable-list {
   position:fixed;
   width: 25%;
   border-right: 3px solid #00bc8c;
+  height: 100vh;
 }
 .lesson-loader-wrapper{
   left: 25%;
