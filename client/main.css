@@ -151,3 +151,6 @@ ol.nestable-list {
   width: 100vw;
   height: 100vh;
 }
+.lesson-listing-selected{
+  background-color: #100e0e;
+}

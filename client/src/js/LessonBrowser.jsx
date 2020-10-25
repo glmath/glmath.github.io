@@ -60,15 +60,15 @@ class LessonBrowser extends Component {
             }
         }
     }
-    setCorrectTreeRoot = () =>{
+    setCorrectTreeRoot = () => {
         let currentElement = this.findElementInTreeWithId(this.props.match.params.id);
-        if(currentElement.children.length > 0){
+        if (currentElement.children.length > 0) {
             this.setNewrootFromOldTree(currentElement.id);
-        }else{
+        } else {
             let parent = this.findParentFromChildIdInTree(this.props.match.params.id, this.state.fullTree);
-            if(parent == null){
+            if (parent == null) {
                 this.setNewrootFromOldTree("root")
-            }else{
+            } else {
                 this.setNewrootFromOldTree(parent.id);
             }
         }
@@ -95,9 +95,9 @@ class LessonBrowser extends Component {
     goUpButtonClicked = () => {
         let parent = this.findParentFromChildIdInTree(this.state.lessonTree[0].id, this.state.fullTree);
         console.log("found parent", parent, "for child", this.state.lessonTree[0].id);
-        if(parent == null){
+        if (parent == null) {
             this.setNewrootFromOldTree("root")
-        }else{
+        } else {
             this.setNewrootFromOldTree(parent.id);
         }
     }
@@ -353,32 +353,29 @@ class LessonBrowser extends Component {
 function LessonListing(props) {
     // TODO: inorder to find if were selected, parse the url our self
 
-    const params = new URLSearchParams(window.location.search);
-    let treeRoot = params.get('treeRoot'); // bar
-    if(treeRoot == null){
-        treeRoot = "";
-    }
+    // this is used for highlighting the selected lesson
+    const id = window.location.hash.split("/")[window.location.hash.split("/").length - 1];
 
-    let extraQuery = "?treeRoot=" + ((props.item.children.length > 0) ? props.item.id : treeRoot);
 
     return (
         <div>
             {/* {props} */}
-            <div className={"lesson-listing-wrapper " + (props.isSelected ? "lesson-listing-selected" : "")}  >
+            <Link to={"/math/" + props.item.id}>
+            <div className={"lesson-listing-wrapper " + (id == props.item.id ? "lesson-listing-selected" : "")}  >
                 <div className="list-collapse-icon">
                     {props.collapseIcon}
                 </div>
-                <Link to={"/math/" + props.item.id + extraQuery }>
-                    <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
-                </Link>
+                <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
             </div>
+
+            </Link>
 
             {/* <ul>
                 {props.lesson.children.map(child => {
                     return (<LessonListing key={child.id} lesson={child} />);
                 })}
             </ul> */}
-        </div>
+        </div >
     )
 }
 
