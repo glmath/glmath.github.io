@@ -48,7 +48,7 @@ class Lesson extends Component {
       });
 
     } else {
-      this.getFromGithub();
+      this.getFromGithub(() => {});
     }
   }
 
@@ -177,7 +177,7 @@ class Lesson extends Component {
         lastUpdated: Date.now(),
       })
     }).then(() => {
-      this.getFromGithub();
+      this.getFromGithub(() => {});
     });
   }
 
@@ -211,13 +211,13 @@ class Lesson extends Component {
       },
       cache: "no-store"
     })
-      .then(function (response) {
+      .then(response => {
         if (response.ok) {
           return response.json();
         }
         throw new Error('Error in getting lesson.');
       })
-      .then(function (data) {
+      .then(data =>  {
         console.log(data);
         this.setState({
           serverLesson: data,
@@ -225,8 +225,8 @@ class Lesson extends Component {
           githubLastUpdated: data.lastUpdated,
         });
         callback();
-      }.bind(this))
-      .catch(function (err) {
+      })
+      .catch(err => {
         console.log("failed to load ", url, err.message);
         callback();
       });
