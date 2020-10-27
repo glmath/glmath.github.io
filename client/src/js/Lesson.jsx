@@ -309,7 +309,7 @@ class Lesson extends Component {
 
           {(this.state.serverLesson.lastUpdated != this.state.githubLastUpdated ? 
             <Alert  variant={'danger'}>
-              This lesson has been saved, howerver your changes are not on the public website. When you are ready, Click <b>Publish</b> to publish them to the main website!
+              This lesson has been saved, however your changes are not on the public website yet. When you are ready, Click <b>Publish</b> to publish them to the main website! (Note: that it will take a few minutes after clicking publish for this message to go away)
           </Alert>: "")}
 
 

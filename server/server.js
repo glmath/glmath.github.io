@@ -419,7 +419,7 @@ function mongoSetUpDone() {
           let lesId = childrenIds[i];
 
           let lesson = await findLessonFromDatabase(lesId);
-          let compact = { id: lesson.id, name: lesson.name, children: lesson.children, order: lesson.order, defaultClosed:lesson.defaultClosed }; // the lesson.children is just a placeholder used in the next round
+          let compact = { id: lesson.id, name: lesson.name, children: lesson.children, order: lesson.order, defaultClosed:lesson.defaultClosed, lastUpdated: lesson.lastUpdated }; // the lesson.children is just a placeholder used in the next round
 
           newRoot.children.push(compact); // we add it here to fix it later
           queue.push(compact);

@@ -30,7 +30,9 @@
 
 body{
   scrollbar-color:#375a7f  #303030 ; /* first vertical then the peice */
+  scrollbar-color:#00bc8c  #303030 ; /* first vertical then the peice */
   scrollbar-width: auto;
+
 
 
 }
@@ -45,7 +47,7 @@ body{
   background-color:  #303030 /* alos blue */;
 }
 ::-webkit-scrollbar-thumb:vertical {
-  background-color: #375a7f; /* the vertical*/
+  background-color: #00bc8c; /* the vertical*/
 }
 
 
@@ -147,6 +149,7 @@ ol.nestable-list {
   width: 25%;
   border-right: 3px solid #00bc8c;
   height: 100vh;
+  overflow-y: scroll;
 }
 .lesson-loader-wrapper{
   left: 25%;
