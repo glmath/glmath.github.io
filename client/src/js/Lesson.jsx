@@ -150,6 +150,7 @@ class Lesson extends Component {
 
     fetch(this.props.url + "/post/lesson/", {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -170,6 +171,7 @@ class Lesson extends Component {
 
     fetch(this.props.url + "/post/lesson-to-github/", {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

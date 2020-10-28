@@ -80,9 +80,9 @@ function mongoSetUpDone() {
     // unset: 'destroy',
     domain: 'glmath.github.io',
     saveUninitialized: false,
-    httpOnly: false,
     cookie:  {
         // path: '/',
+        httpOnly: false,
         domain: 'glmath.github.io',
         maxAge: 24 * 6 * 60 * 10000
     },
