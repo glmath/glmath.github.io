@@ -153,7 +153,8 @@ class LessonBrowser extends Component {
         // create lesson id using time and name
         // let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
 
-        let lessonId = uuidv4();
+        // make id from base36 of time
+        let lessonId = (Date.now()).toString(36);
 
         // // send request to server to create new lesson
         fetch(this.props.url + "/post/create/lesson/", {
