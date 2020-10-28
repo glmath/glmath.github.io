@@ -160,7 +160,9 @@ class Lesson extends Component {
         name: this.state.serverLesson.name,
         lastUpdated: lastUpdated,
       })
-    })
+    }).then(res => res.json()).then(res => {
+      console.log(res.status);
+    });
   }
 
   saveToGithub = () => {

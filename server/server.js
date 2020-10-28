@@ -62,7 +62,8 @@ function mongoSetUpDone() {
     }
 
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization");
+
 
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
@@ -74,17 +75,25 @@ function mongoSetUpDone() {
 
   app.set('trust proxy', 1) // trust first proxy
   app.use(session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: "auto" }
-  }))
+    secret: 'secret',
+    resave: true,
+    // unset: 'destroy',
+    domain: 'glmath.github.io',
+    saveUninitialized: false,
+    cookie:  {
+        // path: '/',
+        domain: 'glmath.github.io',
+        maxAge: 24 * 6 * 60 * 10000
+    },
+    store: new MongoStore({url: config.db, autoReconnect:true})
+})) 
   
   app.listen(port, function () {
     console.log("GlMath Server Started on port " + port);
   });
 
   function checkAuth (req, res, next){
+    console.log(req.session);
     if(req.session.loggedIn){
       next();
     }else{
@@ -95,6 +104,7 @@ function mongoSetUpDone() {
   app.post('/login', function (req, res) {
     if (req.body.password == process.env.ADMIN_PASSWORD) {
       req.session.loggedIn = true;
+      console.log(req.session);
       res.send(JSON.stringify({status: "success"}))
     } else {
       res.send(JSON.stringify({status: "fail"}));
