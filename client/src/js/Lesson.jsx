@@ -48,7 +48,7 @@ class Lesson extends Component {
       });
 
     } else {
-      this.getFromGithub(() => {});
+      this.getFromGithub(() => { });
     }
   }
 
@@ -144,7 +144,7 @@ class Lesson extends Component {
     let lastUpdated = Date.now();
     let oldLesson = this.state.serverLesson;
     oldLesson.lastUpdated = lastUpdated;
-    this.setState({serverLesson: oldLesson});
+    this.setState({ serverLesson: oldLesson });
 
 
     fetch(this.props.url + "/post/lesson/", {
@@ -177,7 +177,7 @@ class Lesson extends Component {
         lastUpdated: Date.now(),
       })
     }).then(() => {
-      this.getFromGithub(() => {});
+      this.getFromGithub(() => { });
     });
   }
 
@@ -217,7 +217,7 @@ class Lesson extends Component {
         }
         throw new Error('Error in getting lesson.');
       })
-      .then(data =>  {
+      .then(data => {
         console.log(data);
         this.setState({
           serverLesson: data,
@@ -307,10 +307,10 @@ class Lesson extends Component {
 
         {this.props.isAdmin ? <div>
 
-          {(this.state.serverLesson.lastUpdated != this.state.githubLastUpdated ? 
-            <Alert  variant={'danger'}>
+          {(this.state.serverLesson.lastUpdated != this.state.githubLastUpdated ?
+            <Alert variant={'danger'}>
               This lesson has been saved, however your changes are not on the public website yet. When you are ready, Click <b>Publish</b> to publish them to the main website! (Note: that it will take a few minutes after clicking publish for this message to go away)
-          </Alert>: "")}
+          </Alert> : "")}
 
 
           <Button variant="dark" onClick={() => {
@@ -353,6 +353,13 @@ class Lesson extends Component {
         {/* <LessonViewer rawContent={this.state.rawContent}></LessonViewer> */}
         {/* <LessonEditor rawContent_set={this.rawContentSet} rawContent={this.state.rawContent} /> */}
 
+
+        <div className="footer-wrapper">
+          <div className="footer-right-align">
+            <span class="footer-text">Math Content by Pinetree Mathematics Department Head: Mr.G Lin </span>
+            <span class="footer-text"> <Button variant="dark" className=" btn-xs admin-login-button"> Admin </Button> App by <a href="https://shahan.ca" target="_blank">Shahan Neda</a></span>
+          </div>
+        </div>
       </div>
     );
   }

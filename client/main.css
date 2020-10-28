@@ -165,3 +165,30 @@ ol.nestable-list {
 .lesson-listing-name{
   display: inline;
 }
+
+
+.footer-wrapper {
+  bottom: 0px;
+  position: absolute;
+  text-align: right;
+  right: 0px;
+  font-size: 10px;
+  background-color: #1a1717;
+  width: 100%;
+  padding:10px;
+}
+.footer-text {
+  display: block;
+  padding-right:3em;
+}
+.btn.btn-xs {
+  padding: .50rem .4rem;
+  font-size: .875rem;
+  line-height: .5;
+  border-radius: .2rem;
+
+}
+
+.admin-login-button {
+  margin-right: 11em;
+}
