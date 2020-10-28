@@ -85,7 +85,6 @@ function mongoSetUpDone() {
         domain: 'glmath.github.io',
         maxAge: 24 * 6 * 60 * 10000
     },
-    store: new MongoStore({url: config.db, autoReconnect:true})
 })) 
   
   app.listen(port, function () {
