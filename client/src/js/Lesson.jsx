@@ -5,6 +5,7 @@ import React, { Component, useState } from "react";
 import { Button, Modal, Spinner, Alert } from "react-bootstrap";
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import Footer from "./Footer.jsx"
 import {
   Link
 } from "react-router-dom";
@@ -247,10 +248,12 @@ class Lesson extends Component {
 
     // if we have not loaded yet, display spinner
     if (this.state.serverLesson == null) {
-      return (
+      return (<>
         <Spinner className="spinner" animation="border" role="status">
           <span className="sr-only">Loading...</span>
         </Spinner>
+        <Footer isAdmin={this.props.isAdmin} loginButton={this.props.loginButton} logoutButton={this.props.logoutButton} />
+        </>
       );
     }
 
@@ -286,6 +289,8 @@ class Lesson extends Component {
       }
 
     }
+
+
 
 
     return (
@@ -354,12 +359,7 @@ class Lesson extends Component {
         {/* <LessonEditor rawContent_set={this.rawContentSet} rawContent={this.state.rawContent} /> */}
 
 
-        <div className="footer-wrapper">
-          <div className="footer-right-align">
-            <span class="footer-text">Math Content by Pinetree Mathematics Department Head: Mr.G Lin </span>
-            <span class="footer-text"> <Button variant="dark" className=" btn-xs admin-login-button"> Admin </Button> App by <a href="https://shahan.ca" target="_blank">Shahan Neda</a></span>
-          </div>
-        </div>
+        <Footer isAdmin={this.props.isAdmin} loginButton={this.props.loginButton} logoutButton={this.props.logoutButton} />
       </div>
     );
   }

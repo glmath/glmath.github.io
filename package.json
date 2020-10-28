@@ -21,6 +21,7 @@
     "cookie-parser": "^1.4.5",
     "css-loader": "^3.5.2",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
     "file-loader": "^6.1.1",
     "get-video-id": "^3.1.4",
     "katex": "^0.12.0",

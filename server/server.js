@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT;
 const { exec } = require("child_process");
+const session = require('express-session')
 
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
@@ -16,7 +17,6 @@ let usersCollection = null;
 let lessonsCollection = null;
 // let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 // cons
-console.log(process.env.DB_PASSWORD);
 let uri = "mongodb+srv://nedaChatAdmin:" + process.env.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 const fs = require('fs');
 const { ListGroupItem } = require("react-bootstrap");
@@ -24,6 +24,7 @@ const { ListGroupItem } = require("react-bootstrap");
 // since creating a lesson tree is expensive, memonize it to optimize
 let cachedLessonTree = {};
 let shouldRecalculateTree = true; // if we moved something or renamed we should recalulate tree
+
 
 MongoClient.connect(uri, function (err, dbtemp) {
   if (err) {
@@ -54,113 +55,137 @@ function mongoSetUpDone() {
   // Add headers
   app.use(function (req, res, next) {
 
-    // Website you wish to allow to connect
     if (req.headers.origin == undefined) {
       res.setHeader('Access-Control-Allow-Origin', "http://127.0.0.1:7772");
     } else {
       res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     }
-    console.log(req.headers.origin);
 
-    // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
 
-    // Pass to next layer of middleware
     next();
   });
 
+
+  app.set('trust proxy', 1) // trust first proxy
+  app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: "auto" }
+  }))
+  
   app.listen(port, function () {
-    console.log("Neda Plan Server Started on port " + port);
+    console.log("GlMath Server Started on port " + port);
   });
 
-  app.post('/newUser', (req, res) => {
-    req.body.id = req.body.id.toLowerCase();
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const hash = bcrypt.hashSync(req.body.password, salt);
-    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-      if (user != null || user != undefined) {
-        res.send("duplicate");
-        return;
-      }
-      usersCollection.insertOne({
-        _id: req.body.id,
-        id: req.body.id,
-        password: hash,
-        lists: {},
-      });
-      res.send("new user added");
+  function checkAuth (req, res, next){
+    if(req.session.loggedIn){
+      next();
+    }else{
+      res.send(JSON.stringify({status: "invalid-login"}))
+    }
+  }
 
-    });
-
-
-  });
-  app.post('/loginUser', (req, res) => {
-    req.body.id = req.body.id.toLowerCase();
-    res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-      if (user != null) {
-        res.send(JSON.stringify({ correctPass: bcrypt.compareSync(req.body.password, user.password) }));
-      } else {
-        res.send(JSON.stringify({ correctPass: false }));
-      }
-
-    });
+  app.post('/login', function (req, res) {
+    if (req.body.password == procces.env.ADMIN_PASSWORD) {
+      req.session.loggedIn = true;
+      res.send(JSON.stringify({status: "success"}))
+    } else {
+      res.send(JSON.stringify({status: "fail"}));
+    }
   });
 
-  app.get('/getUsers', (req, res) => {
-    usersCollection.find({}).toArray((err, users) => {
-      let usersToSend = {};
-      users.map((user, index) => {
-        delete users[index].password;
-        usersToSend[user.id] = users[index];
-      });
-      res.setHeader('Content-Type', 'application/json');
+  app.get('/logout', function (req, res) {
+    delete req.session.loggedIn;
+    res.send(JSON.stringify({status: "success"}));
+  });      
 
-      res.send(JSON.stringify(usersToSend));
-    });
-  });
+  // app.post('/newUser', (req, res) => {
+  //   req.body.id = req.body.id.toLowerCase();
+  //   const salt = bcrypt.genSaltSync(saltRounds);
+  //   const hash = bcrypt.hashSync(req.body.password, salt);
+  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+  //     if (user != null || user != undefined) {
+  //       res.send("duplicate");
+  //       return;
+  //     }
+  //     usersCollection.insertOne({
+  //       _id: req.body.id,
+  //       id: req.body.id,
+  //       password: hash,
+  //       lists: {},
+  //     });
+  //     res.send("new user added");
+
+  //   });
+  // });
+  // app.post('/loginUser', (req, res) => {
+  //   req.body.id = req.body.id.toLowerCase();
+  //   res.setHeader('Content-Type', 'application/json');
+  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+  //     if (user != null) {
+  //       res.send(JSON.stringify({ correctPass: bcrypt.compareSync(req.body.password, user.password) }));
+  //     } else {
+  //       res.send(JSON.stringify({ correctPass: false }));
+  //     }
+
+  //   });
+  // });
+
+  // app.get('/getUsers', (req, res) => {
+  //   usersCollection.find({}).toArray((err, users) => {
+  //     let usersToSend = {};
+  //     users.map((user, index) => {
+  //       delete users[index].password;
+  //       usersToSend[user.id] = users[index];
+  //     });
+  //     res.setHeader('Content-Type', 'application/json');
+
+  //     res.send(JSON.stringify(usersToSend));
+  //   });
+  // });
 
 
-  app.post('/userExists', (req, res) => {
-    req.body.id = req.body.id.toLowerCase();
-    res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-      if (user == null || user == undefined || err) {
-        res.send(JSON.stringify({ exists: false }));
-        return;
-      }
-      res.send(JSON.stringify({ exists: true }));
-    });
+  // app.post('/userExists', (req, res) => {
+  //   req.body.id = req.body.id.toLowerCase();
+  //   res.setHeader('Content-Type', 'application/json');
+  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+  //     if (user == null || user == undefined || err) {
+  //       res.send(JSON.stringify({ exists: false }));
+  //       return;
+  //     }
+  //     res.send(JSON.stringify({ exists: true }));
+  //   });
 
-  });
+  // });
 
-  app.post('/deleteUser', (req, res) => {
-    req.body.id = req.body.id.toLowerCase();
-    console.log("got remove reqest");
-    res.setHeader('Content-Type', 'application/json');
-    usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-      if (user == null || user == undefined || err) {
-        res.send(JSON.stringify({}));
-        return;
-      }
-      usersCollection.remove({ _id: req.body.id });
-      console.log("removed user" + req.body.id);
-      res.send(JSON.stringify({}));
-    });
-  });
+  // app.post('/deleteUser', (req, res) => {
+  //   req.body.id = req.body.id.toLowerCase();
+  //   console.log("got remove reqest");
+  //   res.setHeader('Content-Type', 'application/json');
+  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
+  //     if (user == null || user == undefined || err) {
+  //       res.send(JSON.stringify({}));
+  //       return;
+  //     }
+  //     usersCollection.remove({ _id: req.body.id });
+  //     console.log("removed user" + req.body.id);
+  //     res.send(JSON.stringify({}));
+  //   });
+  // });
 
 
 
-  app.post('/post/lesson/', (req, res) => {
+  app.post('/post/lesson/', checkAuth, (req, res) => {
     let id = req.body.id;
     console.log("******* NEW LESSON UPDATE***********");
-    console.log("LESOSN BODY ", req.body);
+    console.log("LESOSN NAME and ID ", req.body.name, "  :  ", req.body.id);
     let hadToUpdateParent = false;
 
 
@@ -223,7 +248,7 @@ function mongoSetUpDone() {
 
   });
 
-  app.post("/post/lesson-to-github/", (req, res) => {
+  app.post("/post/lesson-to-github/", checkAuth, (req, res) => {
     let id = req.body.id;
     let filename = __dirname + "/../client/lessons/" + id + ".json";
 
@@ -245,7 +270,7 @@ function mongoSetUpDone() {
     });
   });
 
-  app.post("/post/lesson-tree-to-github/", (req, res) => {
+  app.post("/post/lesson-tree-to-github/", checkAuth, (req, res) => {
     let id = "LessonTree";
     let filename = __dirname + "/../client/lessons/lessontree.json";
     commitToGithub(id, filename, () => {
@@ -310,7 +335,7 @@ function mongoSetUpDone() {
     });
   }
 
-  app.post("/post/create/lesson/", (req, res) => {
+  app.post("/post/create/lesson/", checkAuth, (req, res) => {
     let newLesson = req.body;
     let parentId = req.body.parentId;
     console.log("Updating lesson", newLesson.id, " parent,", parentId);
@@ -381,7 +406,7 @@ function mongoSetUpDone() {
     }
   });
 
-  app.post("/post/lesson-tree/", (req, res) => {
+  app.post("/post/lesson-tree/",checkAuth, (req, res) => {
     // let tree = req.body;
 
   });

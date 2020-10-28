@@ -63,6 +63,9 @@ class LessonBrowser extends Component {
     }
     setCorrectTreeRoot = () => {
         let currentElement = this.findElementInTreeWithId(this.props.match.params.id);
+        if(!currentElement){
+            return;
+        }
         if (currentElement.children.length > 0) {
             this.setNewrootFromOldTree(currentElement.id);
         } else {
