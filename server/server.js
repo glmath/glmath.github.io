@@ -93,7 +93,7 @@ function mongoSetUpDone() {
   }
 
   app.post('/login', function (req, res) {
-    if (req.body.password == proccess.env.ADMIN_PASSWORD) {
+    if (req.body.password == process.env.ADMIN_PASSWORD) {
       req.session.loggedIn = true;
       res.send(JSON.stringify({status: "success"}))
     } else {
