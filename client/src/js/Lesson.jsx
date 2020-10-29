@@ -185,7 +185,7 @@ class Lesson extends Component {
       })
     }).then(res => res.json()).then((res) => {
       logoutIfBadAuth(res);
-      this.getFromGithub(() => { });
+      this.getFromGithub(() => {this.getFromServer()});
     });
   }
 
