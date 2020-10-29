@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Container, Modal, Button, ButtonGroup } from "react-bootstrap";
 import { v4 as uuidv4 } from 'uuid';
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 import {
     HashRouter,

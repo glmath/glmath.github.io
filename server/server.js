@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT;
 const { exec } = require("child_process");
 const session = require('express-session')
+const { v4: uuidv4 } = require('uuid');
 
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
@@ -25,6 +26,7 @@ const { ListGroupItem } = require("react-bootstrap");
 let cachedLessonTree = {};
 let shouldRecalculateTree = true; // if we moved something or renamed we should recalulate tree
 
+let validSessions = [];
 
 MongoClient.connect(uri, function (err, dbtemp) {
   if (err) {
@@ -73,48 +75,65 @@ function mongoSetUpDone() {
   });
 
 
-  app.set('trust proxy', 1) // trust first proxy
-  app.use(session({
-    secret: 'secret',
-    resave: true,
-    // unset: 'destroy',
-    domain: 'glmath.github.io',
-    saveUninitialized: false,
-    cookie:  {
-        // path: '/',
-        httpOnly: false,
-        domain: 'glmath.github.io',
-        maxAge: 24 * 6 * 60 * 10000
-    },
-})) 
-  
+  //   app.set('trust proxy', 1) // trust first proxy
+  //   app.use(session({
+  //     secret: 'secret',
+  //     resave: true,
+  //     // unset: 'destroy',
+  //     domain: 'glmath.github.io',
+  //     saveUninitialized: false,
+  //     cookie:  {
+  //         // path: '/',
+  //         httpOnly: false,
+  //         domain: 'glmath.github.io',
+  //         maxAge: 24 * 6 * 60 * 10000,
+  //         secure:"auto",
+  //     },
+  // })) 
+
   app.listen(port, function () {
     console.log("GlMath Server Started on port " + port);
   });
 
-  function checkAuth (req, res, next){
-    console.log(req.session);
-    if(req.session.loggedIn){
+  function checkAuth(req, res, next) {
+    console.log(req.headers);
+    let sessionId = req.headers.sessionid;
+
+    if (validSessions.indexOf(sessionId) != -1) {
       next();
-    }else{
-      res.send(JSON.stringify({status: "invalid-login"}))
+    } else {
+      res.send(JSON.stringify({ status: "invalid-login" }))
     }
   }
 
   app.post('/login', function (req, res) {
     if (req.body.password == process.env.ADMIN_PASSWORD) {
-      req.session.loggedIn = true;
-      console.log(req.session);
-      res.send(JSON.stringify({status: "success"}))
+      if(validSessions.length > 100){
+        validSessions.shift();
+      }
+
+      let newSessionId = uuidv4();
+      validSessions.push(newSessionId);
+
+      res.send(JSON.stringify(
+        {
+          status: "success",
+          sessionId: newSessionId,
+        }
+      ));
+
     } else {
-      res.send(JSON.stringify({status: "fail"}));
+      res.send(JSON.stringify({ status: "fail" }));
     }
   });
 
   app.get('/logout', function (req, res) {
-    delete req.session.loggedIn;
-    res.send(JSON.stringify({status: "success"}));
-  });      
+
+    var index = validSessions.indexOf(req.headers.sessionid);
+    validSessions.splice(index, 1);
+
+    res.send(JSON.stringify({ status: "success" }));
+  });
 
   // app.post('/newUser', (req, res) => {
   //   req.body.id = req.body.id.toLowerCase();
@@ -416,7 +435,7 @@ function mongoSetUpDone() {
     }
   });
 
-  app.post("/post/lesson-tree/",checkAuth, (req, res) => {
+  app.post("/post/lesson-tree/", checkAuth, (req, res) => {
     // let tree = req.body;
 
   });
@@ -454,14 +473,14 @@ function mongoSetUpDone() {
           let lesId = childrenIds[i];
 
           let lesson = await findLessonFromDatabase(lesId);
-          let compact = { id: lesson.id, name: lesson.name, children: lesson.children, order: lesson.order, defaultClosed:lesson.defaultClosed, lastUpdated: lesson.lastUpdated }; // the lesson.children is just a placeholder used in the next round
+          let compact = { id: lesson.id, name: lesson.name, children: lesson.children, order: lesson.order, defaultClosed: lesson.defaultClosed, lastUpdated: lesson.lastUpdated }; // the lesson.children is just a placeholder used in the next round
 
           newRoot.children.push(compact); // we add it here to fix it later
           queue.push(compact);
         }
 
         // this just sort and puts in correct order
-        newRoot.children.sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0)); 
+        newRoot.children.sort((a, b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0));
       }
     }
 

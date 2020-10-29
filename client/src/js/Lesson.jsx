@@ -13,7 +13,8 @@ import {
 import getVideoId from 'get-video-id';
 import EditableText from "./EditableText.jsx";
 
-
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 
 
 class Lesson extends Component {
@@ -154,6 +155,7 @@ class Lesson extends Component {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        "SessionId": this.props.sessionId,
       },
       body: JSON.stringify({
         id: this.props.id,
@@ -162,7 +164,7 @@ class Lesson extends Component {
         lastUpdated: lastUpdated,
       })
     }).then(res => res.json()).then(res => {
-      console.log(res.status);
+
     });
   }
 
@@ -175,6 +177,7 @@ class Lesson extends Component {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        "SessionId": this.props.sessionId,
       },
       body: JSON.stringify({
         id: this.props.id,
@@ -185,6 +188,8 @@ class Lesson extends Component {
       this.getFromGithub(() => { });
     });
   }
+
+  
 
   // Old way of getting from database
   getFromServer = () => {
@@ -416,6 +421,13 @@ function LessonViewer(props) {
 
 
 
+
+function logoutIfBadAuth(res){
+      if(res.status == "invalid-login"){
+        cookies.set("isAdmin", "false");
+        location.reload();
+      }
+}
 
 function UploadToServerModal(props) {
 

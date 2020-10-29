@@ -25,9 +25,11 @@ class LMath extends Component {
     super(props);
     // TEMP FOR TESTING 
     let admin = cookies.get("isAdmin") == "true";
+    let sessionId = cookies.get("sessionId");
 
     this.state = {
       isAdmin: admin,
+      sessionId: sessionId,
     }
   }
   loginButtonClicked = () => {
@@ -46,8 +48,9 @@ class LMath extends Component {
       .then(res => {
         console.log(res);
         if(res.status == "success"){
-          this.setState({isAdmin:true});
-          cookies.set("isAdmin", "true")
+          this.setState({isAdmin:true, sessionId: res.sessionId});
+          cookies.set("isAdmin", "true");
+          cookies.set("sessionId", res.sessionId);
         }else{
           alert("Incorrect password!");
         }
@@ -70,6 +73,7 @@ class LMath extends Component {
 
       location.reload();
   }
+
   render() {
     return (
       <Container fluid>
@@ -81,8 +85,8 @@ class LMath extends Component {
 
             <Route path="/math/:id" children={
               <div className="lesson-page-wrapper row">
-                <LessonBrowser defaultCollapsed={false}  loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
-                <LessonLoader loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
+                <LessonBrowser sessionId={this.state.sessionId} defaultCollapsed={false}  loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+                <LessonLoader sessionId={this.state.sessionId} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
               </div>
             }></Route>
 
@@ -119,7 +123,7 @@ function LessonLoader(props) {
 
   return (
     <div className="lesson-loader-wrapper col-9">
-      <Lesson loginButton={props.loginButton} logoutButton={props.logoutButton} key={id} id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
+      <Lesson  sessionId={props.sessionId} loginButton={props.loginButton} logoutButton={props.logoutButton} key={id} id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
     </div>
   );
 }
