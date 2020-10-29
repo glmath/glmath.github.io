@@ -35,7 +35,6 @@ class Lesson extends Component {
 
     };
 
-    console.log("test");
     this.checkFromServerDependingOnAdmin();
 
   }
@@ -164,7 +163,7 @@ class Lesson extends Component {
         lastUpdated: lastUpdated,
       })
     }).then(res => res.json()).then(res => {
-
+      logoutIfBadAuth(res);
     });
   }
 
@@ -184,7 +183,8 @@ class Lesson extends Component {
         content: this.state.editorState,
         lastUpdated: Date.now(),
       })
-    }).then(() => {
+    }).then(res => res.json()).then((res) => {
+      logoutIfBadAuth(res);
       this.getFromGithub(() => { });
     });
   }

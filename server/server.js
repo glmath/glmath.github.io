@@ -96,7 +96,6 @@ function mongoSetUpDone() {
   });
 
   function checkAuth(req, res, next) {
-    console.log(req.headers);
     let sessionId = req.headers.sessionid;
 
     if (validSessions.indexOf(sessionId) != -1) {

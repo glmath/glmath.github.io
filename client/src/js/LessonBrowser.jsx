@@ -65,7 +65,7 @@ class LessonBrowser extends Component {
     }
     setCorrectTreeRoot = () => {
         let currentElement = this.findElementInTreeWithId(this.props.match.params.id);
-        if(!currentElement){
+        if (!currentElement) {
             return;
         }
         if (currentElement.children.length > 0) {
@@ -125,6 +125,7 @@ class LessonBrowser extends Component {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                "SessionId": this.props.sessionId,
             },
             body: JSON.stringify({
                 id: id,
@@ -134,6 +135,7 @@ class LessonBrowser extends Component {
         }).then(response => response.json())
             .then(data => {
                 if (data != undefined && data.status == "success") {
+                    logoutIfBadAuth(data);
                     this.setState({});
                     this.refreshLessonsFromServer();
                 }
@@ -167,6 +169,7 @@ class LessonBrowser extends Component {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                "SessionId": this.props.sessionId,
             },
             body: JSON.stringify({
                 id: lessonId,
@@ -175,7 +178,8 @@ class LessonBrowser extends Component {
                 parentId: parentId,
                 children: [],
             })
-        }).then(() => {
+        }).then(res => res.json()).then(() => {
+            logoutIfBadAuth(data);
             this.refreshLessonsFromServer();
         });
 
@@ -244,10 +248,13 @@ class LessonBrowser extends Component {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
+                "SessionId": this.props.sessionId,
             },
             body: JSON.stringify({
             })
-        })
+        }).then(res => res.json()).then((res) => {
+            logoutIfBadAuth(res);
+        });
     }
 
     // this is to make sure we dont move root or the destination parent
@@ -340,11 +347,11 @@ class LessonBrowser extends Component {
                                 content={this.state.modalContent}
                                 isShowing={this.state.showingUploadModal}
                                 close={() => this.setState({ showingUploadModal: false })}
-                            /> 
-                            
-                        <Button className="btn-success btn create-lesson-button" onClick={this.createNewLesson}>New</Button>
-                            
-                            </> : ""
+                            />
+
+                            <Button className="btn-success btn create-lesson-button" onClick={this.createNewLesson}>New</Button>
+
+                        </> : ""
                         }
                     </ButtonGroup>
 
@@ -385,10 +392,10 @@ function LessonListing(props) {
                 {props.collapseIcon}
             </div>
 
-            <Link className={"lesson-listing-link-wrapper"  } to={"/math/" + props.item.id}>
-                    <div className={"lesson-listing-name"}  >
-                        <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
-                    </div>
+            <Link className={"lesson-listing-link-wrapper"} to={"/math/" + props.item.id}>
+                <div className={"lesson-listing-name"}  >
+                    <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
+                </div>
             </Link>
 
         </div >
@@ -420,5 +427,11 @@ function UploadToServerModal({ close, isShowing, content, closeButton = true }) 
     );
 }
 
+function logoutIfBadAuth(res) {
+    if (res.status == "invalid-login") {
+        cookies.set("isAdmin", "false");
+        location.reload();
+    }
+}
 
 export default withRouter(LessonBrowser);
