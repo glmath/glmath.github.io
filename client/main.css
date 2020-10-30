@@ -98,6 +98,10 @@ div.spinner{
   width: 50em;
   height: 50em;
 }
+div.spinner-sm{
+  width: 10em;
+  height: 10em;
+}
 
 
 .lesson-listing-wrapper{
