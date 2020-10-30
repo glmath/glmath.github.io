@@ -178,7 +178,7 @@ class LessonBrowser extends Component {
                 parentId: parentId,
                 children: [],
             })
-        }).then(res => res.json()).then(() => {
+        }).then(res => res.json()).then((data) => {
             logoutIfBadAuth(data);
             this.refreshLessonsFromServer();
         });
