@@ -105,9 +105,6 @@ class LessonBrowser extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-
-        console.log(this.state.lessonTree == prevState.lessonTree);
-        
         if (this.state.lessonTree != prevState.lessonTree) {
             this.setCorrectCollapse();
         }

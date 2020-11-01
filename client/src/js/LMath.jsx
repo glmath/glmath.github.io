@@ -166,9 +166,12 @@ function LoginModal({ close, onSubmit, content, type = "loading", shouldShowClos
         <Modal.Title></Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {type == "loading" ? <Spinner className="spinner spinner-sm" animation="border" role="status">
-          <span className="sr-only">Starting up server, this might take a while the first time...</span>
-        </Spinner> :
+        {type == "loading" ?
+          <div>
+            <div className="starting-up-server-span">Starting up server, this might take a while if the server has been inactive...</div>
+            <Spinner className="spinner spinner-sm" animation="border" role="status">
+            </Spinner>
+          </div> :
           content
         }
         {type == "login" ?
