@@ -25,15 +25,16 @@ class LessonBrowser extends Component {
             showingUploadModal: false,
             modalContent: "",
         };
+        this.refNestable = React.createRef();
         this.updateTreeIfAdmin();
 
     }
     componentDidMount() {
+        this.prevNestebleRef = this.refNestable.current;
     }
 
     setNewrootFromOldTree = (newRootId) => {
         let newRootElement = this.findElementInTreeWithId(newRootId);
-        console.log("new root elemnt", newRootElement);
         if (newRootElement == null || newRootId == null || newRootId == "") {
             this.setState({
                 lessonTree: this.state.fullTree,
@@ -46,6 +47,24 @@ class LessonBrowser extends Component {
         })
     }
 
+    setCorrectCollapse = () => {
+       
+        
+        if (this.refNestable.current && this.state.lessonTree.length == 1 && this.state.lessonTree) { // make sure we are not root, since thats a special case( root has more than one top node)
+            let childrenOfTop = this.state.lessonTree[0].children;
+
+            this.refNestable.current.collapse("NONE");
+            console.log("SETTING CORRECT COLLAPSE")
+            let arrayToCollapse = [];
+            childrenOfTop.forEach(child => {
+                arrayToCollapse.push(child.id);
+            });
+            console.log(arrayToCollapse);
+            this.refNestable.current.collapse(arrayToCollapse);
+
+            this.alreadySetCorrectCollapse = true;
+        }
+    }
 
     findElementInTreeWithId = (id) => {
         // do a modified bfs/dps
@@ -78,18 +97,31 @@ class LessonBrowser extends Component {
                 this.setNewrootFromOldTree(parent.id);
             }
         }
+
+
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
+
+        console.log(this.state.lessonTree == prevState.lessonTree);
+        
+        if (this.state.lessonTree != prevState.lessonTree) {
+            this.setCorrectCollapse();
+        }
+
+
+
         if (prevProps == this.props) {
             return;
         }
         this.setCorrectTreeRoot();
+        this.alreadySetCorrectCollapse = false;
 
         if (prevProps.isAdmin != this.props.isAdmin) {
             this.updateTreeIfAdmin();
         }
     }
+
     updateTreeIfAdmin = () => {
         if (this.props.isAdmin) {
             this.refreshLessonsFromServer(); // load the lesson tree from the server
@@ -100,11 +132,12 @@ class LessonBrowser extends Component {
 
     goUpButtonClicked = () => {
         let parent = this.findParentFromChildIdInTree(this.state.lessonTree[0].id, this.state.fullTree);
-        console.log("found parent", parent, "for child", this.state.lessonTree[0].id);
         if (parent == null) {
             this.setNewrootFromOldTree("root")
         } else {
             this.setNewrootFromOldTree(parent.id);
+            this.alreadySetCorrectCollapse = false;
+            this.setCorrectCollapse();
         }
     }
 
@@ -156,7 +189,6 @@ class LessonBrowser extends Component {
         }
 
 
-        console.log(parentId);
         // create lesson id using time and name
         // let lessonId = lessonName.trim().replace(/\s+/g, "") + new Date().getTime();
 
@@ -204,7 +236,9 @@ class LessonBrowser extends Component {
                     showingUploadModal: false
                 })
                 this.setCorrectTreeRoot();
+                this.setCorrectCollapse();
             });
+
 
     }
     getFromGithub = () => {
@@ -308,12 +342,9 @@ class LessonBrowser extends Component {
             parentId = parentElementObject.id;
         }
 
-        console.log("FOUND PARENT OBJECT ", parentElementObject);
-        console.log("parent id is", parentId);
 
         let arrayOfChildren = tree;
         if (parentId != "root") {
-            console.log("setting to the actualyl children");
             arrayOfChildren = parentElementObject.children;
         }
 
@@ -359,10 +390,10 @@ class LessonBrowser extends Component {
                         items={this.state.lessonTree}
                         renderItem={LessonListing}
                         onChange={this.lessonTreeNestChange}
-                        collapsed={this.props.defaultCollapsed}
+                        collapsed={this.state.lessonTree.length != 1} // if it equals 1, then we are not root and we dont want to be collapsed, however if it is not 1, we must be root so set collapsed
                         renderCollapseIcon={({ isCollapsed }) => isCollapsed ? "+" : "-"}
                         confirmChange={this.nestableConfirmChange}
-                        ref={el => this.refNestable = el}
+                        ref={this.refNestable}
                     />
                     {/* {<LessonListing lesson={this.state.lessonTree} />} */}
 

@@ -193,7 +193,6 @@ class Lesson extends Component {
 
   // Old way of getting from database
   getFromServer = () => {
-    console.log(this.props);
     fetch(this.props.url + "/get/lesson/" + this.props.id, {
       method: 'GET',
       headers: {
