@@ -391,6 +391,7 @@ function LessonName(props) {
     value={props.name}
     onChange={props.onChange}
     readOnly={!props.isAdmin}
+    className={ props.isAdmin ? " is-admin " : ""}
   /> </h1>
 }
 

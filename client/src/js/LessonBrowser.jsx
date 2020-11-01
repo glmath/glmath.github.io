@@ -47,22 +47,25 @@ class LessonBrowser extends Component {
         })
     }
 
-    setCorrectCollapse = () => {
+    setCorrectCollapse = (isTimeout) => {
        
         
         if (this.refNestable.current && this.state.lessonTree.length == 1 && this.state.lessonTree) { // make sure we are not root, since thats a special case( root has more than one top node)
             let childrenOfTop = this.state.lessonTree[0].children;
-
             this.refNestable.current.collapse("NONE");
-            console.log("SETTING CORRECT COLLAPSE")
+
             let arrayToCollapse = [];
             childrenOfTop.forEach(child => {
                 arrayToCollapse.push(child.id);
             });
-            console.log(arrayToCollapse);
             this.refNestable.current.collapse(arrayToCollapse);
 
-            this.alreadySetCorrectCollapse = true;
+            // this is very hacky but its to ovverid a bug in the Nestable libray, basciallay for somereason the collapse doesnt rerender when we give it multiple things ot collapse, so we do this hacky thing
+            if(isTimeout != true){
+                setTimeout(() => {
+                    this.setCorrectCollapse(true);
+                }, 100);
+            }
         }
     }
 
@@ -115,7 +118,6 @@ class LessonBrowser extends Component {
             return;
         }
         this.setCorrectTreeRoot();
-        this.alreadySetCorrectCollapse = false;
 
         if (prevProps.isAdmin != this.props.isAdmin) {
             this.updateTreeIfAdmin();
@@ -136,8 +138,6 @@ class LessonBrowser extends Component {
             this.setNewrootFromOldTree("root")
         } else {
             this.setNewrootFromOldTree(parent.id);
-            this.alreadySetCorrectCollapse = false;
-            this.setCorrectCollapse();
         }
     }
 

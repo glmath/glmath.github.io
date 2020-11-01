@@ -196,3 +196,10 @@ ol.nestable-list {
 .admin-login-button {
   margin-right: 8em;
 }
+.is-admin.editable-text-normal:hover{
+  border: 1px solid gray;
+  border-radius: 1px;
+  cursor: pointer;
+  color: lightblue;
+
+}
