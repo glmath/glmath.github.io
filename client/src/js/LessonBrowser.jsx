@@ -248,21 +248,22 @@ class LessonBrowser extends Component {
             },
             cache: "no-store"
         })
-            .then(function (response) {
+            .then(response => {
                 if (response.ok) {
                     return response.json();
                 }
                 throw new Error('Error in getting lesson.');
             })
-            .then(function (data) {
+            .then( data => {
                 this.setState({
                     // we dont really want the root to display
                     lessonTree: data[0].children,
                     fullTree: data[0].children,
                 });
-                setCorrectTreeRoot();
-            }.bind(this))
-            .catch(function (err) {
+                this.setCorrectTreeRoot();
+                this.setCorrectCollapse();
+            })
+            .catch( err => {
                 console.log("failed to load ", url, err.message);
             });
 
