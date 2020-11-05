@@ -164,7 +164,10 @@ class Lesson extends Component {
       })
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
+
+
     });
+
   }
 
   saveToGithub = () => {
@@ -249,7 +252,7 @@ class Lesson extends Component {
     let lesson = this.state.serverLesson;
     lesson.name = newName;
     this.setState({ serverLesson: lesson });
-    this.saveToServerDebounced();
+    this.saveToServerDebounced(true);
   }
 
   render() {
@@ -392,6 +395,7 @@ function LessonName(props) {
     onChange={props.onChange}
     readOnly={!props.isAdmin}
     className={ props.isAdmin ? " is-admin " : ""}
+    onBlur={() => {setTimeout(()=>location.reload(), 200);}}
   /> </h1>
 }
 

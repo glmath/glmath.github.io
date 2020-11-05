@@ -22,6 +22,7 @@ class EditableText extends Component{
   onKeyDown = (e) => { // finish edit if key is pressed
     if(e.key == "Enter" || e.key == "Escape"){
       this.setState({isEditing: false});
+      this.props.onBlur();
     }
   }
 
@@ -63,7 +64,7 @@ class EditableText extends Component{
         className={"editable-text-edit " + this.props.className} 
         value={this.props.value} 
         onChange={this.props.onChange} 
-        onBlur={() => {console.log("blur  called"); this.setState({isEditing: false})} }
+        onBlur={() => {console.log("blur  called"); this.setState({isEditing: false}); this.props.onBlur();} }
         placeholder={this.props.placeholder}
         {...this.props.otherProps}
       />
