@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Container, Modal, Button, ButtonGroup } from "react-bootstrap";
+import { Container, Modal, Button, ButtonGroup , Spinner} from "react-bootstrap";
 import { v4 as uuidv4 } from 'uuid';
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
@@ -48,8 +48,8 @@ class LessonBrowser extends Component {
     }
 
     setCorrectCollapse = (isTimeout) => {
-       
-        
+
+
         if (this.refNestable.current && this.state.lessonTree.length == 1 && this.state.lessonTree) { // make sure we are not root, since thats a special case( root has more than one top node)
             let childrenOfTop = this.state.lessonTree[0].children;
             this.refNestable.current.collapse("NONE");
@@ -61,7 +61,7 @@ class LessonBrowser extends Component {
             this.refNestable.current.collapse(arrayToCollapse);
 
             // this is very hacky but its to ovverid a bug in the Nestable libray, basciallay for somereason the collapse doesnt rerender when we give it multiple things ot collapse, so we do this hacky thing
-            if(isTimeout != true){
+            if (isTimeout != true) {
                 setTimeout(() => {
                     this.setCorrectCollapse(true);
                 }, 100);
@@ -254,7 +254,7 @@ class LessonBrowser extends Component {
                 }
                 throw new Error('Error in getting lesson.');
             })
-            .then( data => {
+            .then(data => {
                 this.setState({
                     // we dont really want the root to display
                     lessonTree: data[0].children,
@@ -263,7 +263,7 @@ class LessonBrowser extends Component {
                 this.setCorrectTreeRoot();
                 this.setCorrectCollapse();
             })
-            .catch( err => {
+            .catch(err => {
                 console.log("failed to load ", url, err.message);
             });
 
@@ -360,6 +360,17 @@ class LessonBrowser extends Component {
     }
 
     render() {
+
+        // we have not loaded the lesson browser yet
+        if (this.state.lessonTree == null || this.state.lessonTree[0].id == "") {
+            return (
+                <div className="lesson-browser-wrapper">
+                    <Spinner className="spinner spinner-sm" animation="border" role="status"> 
+                    </Spinner>
+                </div >
+            );
+        }
+
         return (
             <div className="lesson-browser-wrapper">
                 <div className="lesson-links">
