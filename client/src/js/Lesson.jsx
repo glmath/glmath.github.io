@@ -37,6 +37,7 @@ class Lesson extends Component {
 
     this.checkFromServerDependingOnAdmin();
 
+
   }
 
   checkFromServerDependingOnAdmin = () => {
@@ -103,13 +104,18 @@ class Lesson extends Component {
       if (currentCaretPos) {
         // The youtube embed code: setting the playist to video id for looping
         // const value = `<iframe width="500" height="500" class="ytvideo-embed-iframe" src="https:/www.youtube-nocookie.com/embed/${videoId}?playlist=${videoId}&loop=1&rel=0" frameborder="0" allow="accelerometer; modestbranding; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
-        const embedCode = '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + videoId + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
+        const embedCode = '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen modestbranding></iframe>'
         // editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, value);
         editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, embedCode);
       } else {
         alert("Please Click somewhere in the text first!")
       }
 
+    });
+
+    $('iframe').on("load", function () {
+      $('iframe').contents().find("head")
+        .append($("<style type='text/css'> .ytp-pause-overlay {display: none; !important} </style>"));
     });
 
   }
@@ -188,11 +194,11 @@ class Lesson extends Component {
       })
     }).then(res => res.json()).then((res) => {
       logoutIfBadAuth(res);
-      this.getFromGithub(() => {this.getFromServer()});
+      this.getFromGithub(() => { this.getFromServer() });
     });
   }
 
-  
+
 
   // Old way of getting from database
   getFromServer = () => {
@@ -264,7 +270,7 @@ class Lesson extends Component {
           <span className="sr-only">Loading...</span>
         </Spinner>
         <Footer isAdmin={this.props.isAdmin} loginButton={this.props.loginButton} logoutButton={this.props.logoutButton} />
-        </>
+      </>
       );
     }
 
@@ -394,8 +400,8 @@ function LessonName(props) {
     value={props.name}
     onChange={props.onChange}
     readOnly={!props.isAdmin}
-    className={ props.isAdmin ? " is-admin " : ""}
-    onBlur={() => {setTimeout(()=>location.reload(), 200);}}
+    className={props.isAdmin ? " is-admin " : ""}
+    onBlur={() => { setTimeout(() => location.reload(), 200); }}
   /> </h1>
 }
 
@@ -426,11 +432,11 @@ function LessonViewer(props) {
 
 
 
-function logoutIfBadAuth(res){
-      if(res.status == "invalid-login"){
-        cookies.set("isAdmin", "false");
-        location.reload();
-      }
+function logoutIfBadAuth(res) {
+  if (res.status == "invalid-login") {
+    cookies.set("isAdmin", "false");
+    location.reload();
+  }
 }
 
 function UploadToServerModal(props) {
