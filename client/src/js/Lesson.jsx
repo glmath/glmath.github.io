@@ -87,7 +87,7 @@ class Lesson extends Component {
 
 
       this.setUpYtEmbed();
-      this.setupImageEmbed();
+      // this.setupImageEmbed();
       this.haveLoadedQuill = true;
     }
   }
@@ -326,7 +326,7 @@ class Lesson extends Component {
         ['formula', 'bold', 'italic', 'underline', 'strike', 'blockquote'],        // toggled buttons
         ['link'],
         ['ytembed'],
-        ['image-embed'],
+        // ['image-embed'],
         ['image'],
 
         // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
