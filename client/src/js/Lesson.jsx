@@ -4,6 +4,9 @@ import 'mathquill4quill/mathquill4quill.css';
 import React, { Component, useState } from "react";
 import { Button, Modal, Spinner, Alert } from "react-bootstrap";
 import ReactQuill, { Quill } from 'react-quill';
+import ImageResize from 'quill-image-resize-module';
+Quill.register('modules/imageResize', ImageResize);
+
 import 'react-quill/dist/quill.snow.css';
 import Footer from "./Footer.jsx"
 import {
@@ -33,6 +36,7 @@ class Lesson extends Component {
       showingUploadModal: false,
       editorState: "",
       imageUploaded: null,
+      showingImageModal: false,
 
     };
 
@@ -80,6 +84,8 @@ class Lesson extends Component {
         historySize: 20
       });
 
+
+
       this.setUpYtEmbed();
       this.setupImageEmbed();
       this.haveLoadedQuill = true;
@@ -123,10 +129,10 @@ class Lesson extends Component {
   }
 
 
-  setUpYtEmbed = () => {
-    var customButton = document.querySelector('.ql-ytembed');
+  setupImageEmbed = () => {
+    var customButton = document.querySelector('.ql-image-embed');
     customButton.addEventListener('click', () => {
-      
+      this.setState({showingImageModal: true});
     });
   }
 
@@ -321,6 +327,7 @@ class Lesson extends Component {
         ['link'],
         ['ytembed'],
         ['image-embed'],
+        ['image'],
 
         // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -355,17 +362,16 @@ class Lesson extends Component {
 
     return (
       <div>
-        <input
-          type="file"
-          onChange={(e) => this.setState({ imageUploaded: e.target.files[0] })}
-          accept='image/*'
-        />
-        <Button className="btn btn-upload-image" onClick={this.uploadImageToServer} >Upload Image</Button>
 
         <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin} />
 
 
-
+        <UploadImageModal
+          isShowing={this.state.showingImageModal}
+          close={() => this.setState({ showingImageModal: false })} 
+          setImageState={ (img) => this.setState({imageUploaded: img})}
+          uploadImageToServer={() => {}}
+          />
 
         <UploadToServerModal
           isShowing={this.state.showingUploadModal}
@@ -408,6 +414,7 @@ class Lesson extends Component {
             modules={{
               formula: true,
               toolbar: toolbarOptions,
+              imageResize: true,
             }}
           />
           :
@@ -488,7 +495,33 @@ function logoutIfBadAuth(res) {
     location.reload();
   }
 }
+function UploadImageModal(props) {
 
+  const handleClose = () => props.close();
+
+  return (
+    <Modal show={props.isShowing} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Upload Image</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+
+        <input
+          type="file"
+          onChange={(e) => props.setImageState(e.target.files[0])}
+          accept='image/*'
+        />
+        <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+          </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
 
 function UploadToServerModal(props) {
 
