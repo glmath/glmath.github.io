@@ -37,6 +37,7 @@ class Lesson extends Component {
       editorState: "",
       imageUploaded: null,
       showingImageModal: false,
+      uploadingImageSpinner: false,
 
     };
 
@@ -87,7 +88,7 @@ class Lesson extends Component {
 
 
       this.setUpYtEmbed();
-      // this.setupImageEmbed();
+      this.setupImageEmbed();
       this.haveLoadedQuill = true;
     }
   }
@@ -131,8 +132,10 @@ class Lesson extends Component {
 
   setupImageEmbed = () => {
     var customButton = document.querySelector('.ql-image-embed');
+
+
     customButton.addEventListener('click', () => {
-      this.setState({showingImageModal: true});
+      this.setState({ showingImageModal: true });
     });
   }
 
@@ -279,11 +282,25 @@ class Lesson extends Component {
 
   uploadImageToServer = () => {
     let image = this.state.imageUploaded;
+    let editor = this.reactQuill.current.editor;
+    var currentCaretPos = editor.getSelection();
+
+    if (!currentCaretPos) {
+      alert("Please click somewhere in the lesson first!");
+      this.setState({ showingImageModal: false });
+      return;
+    }
+    if (!image) {
+      alert("Please select an image first!");
+      return;
+    }
+
 
     let form = new FormData();
     form.append('name', 'image');   //append the values with key, value pair
     form.append('image', image);
 
+    this.setState({ uploadingImageSpinner: true });
     fetch(this.props.url + '/upload-image', {
       method: 'POST',
       credentials: 'include',
@@ -294,11 +311,19 @@ class Lesson extends Component {
       body: form
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
-      if(res.status == "failed" || res.status != "image-uploaded"){
+      if (res.status == "failed" || res.status != "image-uploaded") {
         alert("Failed to upload image!!");
       }
 
       console.log("url = ", res.url);
+
+      if (currentCaretPos) {
+        editor.insertEmbed(currentCaretPos.index, 'image', res.url, Quill.sources.USER);
+        this.setState({ showingImageModal: false, uploadingImageSpinner: false });
+
+      }
+
+
 
       console.log('res of fetch', res)
 
@@ -326,8 +351,8 @@ class Lesson extends Component {
         ['formula', 'bold', 'italic', 'underline', 'strike', 'blockquote'],        // toggled buttons
         ['link'],
         ['ytembed'],
-        // ['image-embed'],
-        ['image'],
+        ['image-embed'],
+        // ['image'],
 
         // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -368,10 +393,11 @@ class Lesson extends Component {
 
         <UploadImageModal
           isShowing={this.state.showingImageModal}
-          close={() => this.setState({ showingImageModal: false })} 
-          setImageState={ (img) => this.setState({imageUploaded: img})}
-          uploadImageToServer={() => {}}
-          />
+          close={() => this.setState({ showingImageModal: false })}
+          setImageState={(img) => this.setState({ imageUploaded: img })}
+          uploadImageToServer={this.uploadImageToServer}
+          spinner={this.state.uploadingImageSpinner}
+        />
 
         <UploadToServerModal
           isShowing={this.state.showingUploadModal}
@@ -511,13 +537,18 @@ function UploadImageModal(props) {
           onChange={(e) => props.setImageState(e.target.files[0])}
           accept='image/*'
         />
-        <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button>
       </Modal.Body>
 
       <Modal.Footer>
+        {props.spinner ? <Spinner className="spinner spinner-sm" animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner> :<>
+
         <Button variant="secondary" onClick={handleClose}>
-          Close
+            Close
           </Button>
+        <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button></>}
+
       </Modal.Footer>
     </Modal>
   );

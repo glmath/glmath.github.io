@@ -139,7 +139,7 @@ span.ql-formats {
 }
 
 .ql-image-embed:after {
-  content: "I";
+  content: "📷";
 }
 
 .ql-editor {
