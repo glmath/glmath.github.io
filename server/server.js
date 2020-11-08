@@ -4,6 +4,7 @@ const port = process.env.PORT;
 const { exec } = require("child_process");
 const session = require('express-session')
 const { v4: uuidv4 } = require('uuid');
+const fileUpload = require('express-fileupload');
 
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
@@ -51,9 +52,16 @@ function mongoSetUpDone() {
 
     ExecuteCommand("git clone https://glMathUpdateBot:" + process.env.GITHUB_PASSWORD + "@github.com/glMath/glmath.github.io.git temp && mv temp/.git ./.git && rm -rf temp " + gitConfig);
   }
-  app.use(express.json());       // to support JSON-encoded bodies
+
+ ;
+  app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+  }));
+
+  app.use(express.json({ limit: '50mb' }));
   app.use(cookieParser());
-  app.use(express.urlencoded()); // to support URL-encoded bodiesk
+  app.use(express.urlencoded({ limit: '50mb' }));
+
   // Add headers
   app.use(function (req, res, next) {
 
@@ -107,7 +115,7 @@ function mongoSetUpDone() {
 
   app.post('/login', function (req, res) {
     if (req.body.password == process.env.ADMIN_PASSWORD) {
-      if(validSessions.length > 100){
+      if (validSessions.length > 100) {
         validSessions.shift();
       }
 
@@ -307,6 +315,33 @@ function mongoSetUpDone() {
       }));
     });
   });
+
+
+  // TODO: add checkauth  
+  app.post('/upload-image', async (req, res) => {
+    console.log(req);
+    try {
+      if (!req.files) {
+        res.send({
+          status: "failed",
+        });
+      } else {
+        let avatar = req.files.image;
+
+        //Use the mv() method to place the file in upload directory (i.e. "uploads")
+        avatar.mv('../client/images/' + image.name);
+
+        res.send({
+          status: "image-uploaded",
+          message: 'File is uploaded',
+          url: "https://glmath.github.io/client/images/" + image.name,
+        });
+      }
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  });
+
 
   function squashLastTwoCommits() {
 

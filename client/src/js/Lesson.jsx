@@ -32,6 +32,7 @@ class Lesson extends Component {
       lastSaveTimeout: "", // used to keep track of the last save
       showingUploadModal: false,
       editorState: "",
+      imageUploaded: null,
 
     };
 
@@ -261,6 +262,37 @@ class Lesson extends Component {
     this.saveToServerDebounced(true);
   }
 
+  uploadImageToServer = () => {
+    let image = this.state.imageUploaded;
+
+    let form = new FormData();
+    form.append('name', 'image');   //append the values with key, value pair
+    form.append('image', image);
+
+    fetch(this.props.url + '/upload-image', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'multipart/form-data ',
+        "SessionId": this.props.sessionId,
+      },
+      body: form
+    }).then(res => res.json()).then(res => {
+      logoutIfBadAuth(res);
+      if(res.status == "failed"){
+        alert("Failed to upload image!!");
+      }
+
+
+      console.log('res of fetch', res)
+
+
+    });
+
+
+  }
+
   render() {
 
     // if we have not loaded yet, display spinner
@@ -310,8 +342,16 @@ class Lesson extends Component {
 
 
 
+
     return (
       <div>
+        <input
+          type="file"
+          onChange={(e) => this.setState({ imageUploaded: e.target.files[0] })}
+          accept='image/*'
+        />
+        <Button className="btn btn-upload-image" onClick={this.uploadImageToServer} >Upload Image</Button>
+
         <LessonName name={this.state.serverLesson.name} onChange={this.handleLessonNameChange} isAdmin={this.props.isAdmin} />
 
 
