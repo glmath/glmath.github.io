@@ -274,7 +274,6 @@ class Lesson extends Component {
       credentials: 'include',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'multipart/form-data ',
         "SessionId": this.props.sessionId,
       },
       body: form

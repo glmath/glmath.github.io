@@ -319,22 +319,24 @@ function mongoSetUpDone() {
 
   // TODO: add checkauth  
   app.post('/upload-image', async (req, res) => {
-    console.log(req);
+    console.log(req.files);
     try {
       if (!req.files) {
         res.send({
           status: "failed",
         });
       } else {
-        let avatar = req.files.image;
+        let image = req.files.image;
+        let filename = image.name + "--" + Date.now();
 
         //Use the mv() method to place the file in upload directory (i.e. "uploads")
-        avatar.mv('../client/images/' + image.name);
+        // image.mv('../client/images/' + image.name);
+
+        image.mv(__dirname + '/../client/images/' + filename);
 
         res.send({
           status: "image-uploaded",
-          message: 'File is uploaded',
-          url: "https://glmath.github.io/client/images/" + image.name,
+          url: "https://glmath.github.io/client/images/" + filename,
         });
       }
     } catch (err) {
