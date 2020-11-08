@@ -279,10 +279,11 @@ class Lesson extends Component {
       body: form
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
-      if(res.status == "failed"){
+      if(res.status == "failed" || res.status != "image-uploaded"){
         alert("Failed to upload image!!");
       }
 
+      console.log("url = ", res.url);
 
       console.log('res of fetch', res)
 

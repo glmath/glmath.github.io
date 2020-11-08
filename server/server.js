@@ -5,6 +5,7 @@ const { exec } = require("child_process");
 const session = require('express-session')
 const { v4: uuidv4 } = require('uuid');
 const fileUpload = require('express-fileupload');
+var cloudinary = require('cloudinary');
 
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
@@ -53,9 +54,10 @@ function mongoSetUpDone() {
     ExecuteCommand("git clone https://glMathUpdateBot:" + process.env.GITHUB_PASSWORD + "@github.com/glMath/glmath.github.io.git temp && mv temp/.git ./.git && rm -rf temp " + gitConfig);
   }
 
- ;
+  ;
   app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
+    useTempFiles: true,
   }));
 
   app.use(express.json({ limit: '50mb' }));
@@ -319,7 +321,6 @@ function mongoSetUpDone() {
 
   // TODO: add checkauth  
   app.post('/upload-image', async (req, res) => {
-    console.log(req.files);
     try {
       if (!req.files) {
         res.send({
@@ -329,17 +330,24 @@ function mongoSetUpDone() {
         let image = req.files.image;
         let filename = image.name + "--" + Date.now();
 
-        //Use the mv() method to place the file in upload directory (i.e. "uploads")
-        // image.mv('../client/images/' + image.name);
+        // image.mv('../client/images/tempI');
 
-        image.mv(__dirname + '/../client/images/' + filename);
+        cloudinary.v2.uploader.upload(image.tempFilePath,
+          (error, result) => {
+            if(error){
+              console.log(err);
+              res.status(500).send(err);
+              return;
+            }
 
-        res.send({
-          status: "image-uploaded",
-          url: "https://glmath.github.io/client/images/" + filename,
-        });
+            res.send({
+              status: "image-uploaded",
+              url: result.secure_url,
+            });
+          });
       }
     } catch (err) {
+      console.log(err);
       res.status(500).send(err);
     }
   });
