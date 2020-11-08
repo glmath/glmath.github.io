@@ -81,6 +81,7 @@ class Lesson extends Component {
       });
 
       this.setUpYtEmbed();
+      this.setupImageEmbed();
       this.haveLoadedQuill = true;
     }
   }
@@ -119,6 +120,14 @@ class Lesson extends Component {
         .append($("<style type='text/css'> .ytp-pause-overlay {display: none; !important} </style>"));
     });
 
+  }
+
+
+  setUpYtEmbed = () => {
+    var customButton = document.querySelector('.ql-ytembed');
+    customButton.addEventListener('click', () => {
+      
+    });
   }
 
 
@@ -311,6 +320,7 @@ class Lesson extends Component {
         ['formula', 'bold', 'italic', 'underline', 'strike', 'blockquote'],        // toggled buttons
         ['link'],
         ['ytembed'],
+        ['image-embed'],
 
         // [{ 'header': 1 }, { 'header': 2 }],               // custom button values
         [{ 'list': 'ordered' }, { 'list': 'bullet' }],
@@ -478,6 +488,7 @@ function logoutIfBadAuth(res) {
     location.reload();
   }
 }
+
 
 function UploadToServerModal(props) {
 

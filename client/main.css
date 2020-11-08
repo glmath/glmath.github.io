@@ -137,6 +137,11 @@ span.ql-formats {
 .ql-ytembed:after {
   content: "🎥";
 }
+
+.ql-image-embed:after {
+  content: "I";
+}
+
 .ql-editor {
   font-size: 25px !important;
 }

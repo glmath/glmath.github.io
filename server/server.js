@@ -334,7 +334,7 @@ function mongoSetUpDone() {
 
         cloudinary.v2.uploader.upload(image.tempFilePath,
           (error, result) => {
-            if(error){
+            if (error) {
               console.log(err);
               res.status(500).send(err);
               return;
@@ -344,6 +344,8 @@ function mongoSetUpDone() {
               status: "image-uploaded",
               url: result.secure_url,
             });
+
+            ExecuteCommand("rm " + image.tempFilePath);
           });
       }
     } catch (err) {
@@ -404,7 +406,9 @@ function mongoSetUpDone() {
       }
       console.log(`stdout: ${stdout}`);
       console.log("GOT HERE FOR comnd, ", cmnd);
-      callback(stdout);
+      if (callback) {
+        callback(stdout);
+      }
     });
   }
 
