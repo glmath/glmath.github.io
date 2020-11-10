@@ -38,13 +38,12 @@ class LMath extends Component {
       closeButtonText: "Cancel",
       modalContent: "",
       lastUpdateLessonBrowser: "",
-    }
+      shouldReloadLessonBrowser: false,
+    } 
+    this.lessonBrowserRef = React.createRef();
   }
   loginButtonClicked = () => {
     this.setState({ showingModal: true, modalType: "login" });
-
-
-
   }
 
   loginModalSubmit = (password) => {
@@ -90,6 +89,20 @@ class LMath extends Component {
     location.reload();
   }
 
+
+  setShouldReloadLessonBrowser = (value) => {
+    // if(value == true){
+    //   this.setState({shouldReloadLessonBrowser: Date.now()});
+    // }else{
+    //   this.setState({shouldReloadLessonBrowser: "reloaded"});
+    // }
+  }
+
+  reloadLessonBrowser = () => {
+    // window.location.assign(window.location.href.split("?")[0]);
+    // this.setShouldReloadLessonBrowser(true);
+  }
+
   render() {
 
     return (
@@ -112,8 +125,8 @@ class LMath extends Component {
 
             <Route path="/:id" children={
               <div className="lesson-page-wrapper row">
-                <LessonBrowser lastUpdate={this.state.lastUpdateLessonBrowser} sessionId={this.state.sessionId} defaultCollapsed={false} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
-                <LessonLoader sessionId={this.state.sessionId} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
+                <LessonBrowser setShouldReload={this.setShouldReloadLessonBrowser}   sessionId={this.state.sessionId} defaultCollapsed={false} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+                <LessonLoader reloadLessonBrowser={this.reloadLessonBrowser} sessionId={this.state.sessionId} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
               </div>
             }></Route>
 
@@ -145,17 +158,23 @@ class LMath extends Component {
 }
 
 
-function LessonLoader(props) {
-  let {id, shouldReload } = useParams();
-  console.log(shouldReload);
 
+function LessonLoader(props) {
+  let {id} = useParams();
+  let location = useLocation();
+  let shouldReload = new URLSearchParams(location.search).get("shouldReload");
+
+  console.log(shouldReload);
   if(shouldReload){
-    this.setState({lastUpdateLessonBrowser: Date.now()});// force the lesson browser to refresh;
+    // props.reloadLessonBrowser();
+    // console.log(window.location);
+    // location.reload();
   }
+
 
   return (
     <div className="lesson-loader-wrapper col-9">
-      <Lesson sessionId={props.sessionId} loginButton={props.loginButton} logoutButton={props.logoutButton} key={id} id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
+      <Lesson reloadLessonBrowser={props.reloadLessonBrowser} sessionId={props.sessionId} loginButton={props.loginButton} logoutButton={props.logoutButton} key={id} id={id} url={props.url} isAdmin={props.isAdmin} clientUrl={props.clientUrl} />
     </div>
   );
 }

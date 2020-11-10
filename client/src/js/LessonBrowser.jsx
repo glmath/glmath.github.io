@@ -127,6 +127,8 @@ class LessonBrowser extends Component {
         } else {
             this.getFromGithub();
         }
+
+        this.props.setShouldReload(false);
     }
 
     goUpButtonClicked = () => {

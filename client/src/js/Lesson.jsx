@@ -338,8 +338,8 @@ class Lesson extends Component {
 
   deleteLesson = () => {
     let c = confirm("Are you 100% sure you want to delete this lesson and all its children?");
-    if(!c){
-      this.setState({showingDeleteModal: false});
+    if (!c) {
+      this.setState({ showingDeleteModal: false });
       return;
     }
     console.log("Deleting Lesson!");
@@ -358,13 +358,18 @@ class Lesson extends Component {
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
       // force the lesson browser to refresh with the query param
-      window.location.assign("/client/#/?shouldReload=true" + this.state.serverLesson.parentId);
+      // window.location.assign("/client/#/" + this.state.serverLesson.parentId);
+      // window.location.assign("/client/#/?shouldReload=true" + this.state.serverLesson.parentId);
+      // this.props.reloadLessonBrowser();
+
+      // for some weird reason in react router, the above lines dont actually refresh, so settling for a full refresh like this for now
+      window.location.href = "/client/";
     });
   }
 
   render() {
 
-    if(this.state.shouldRedirectToRoot){
+    if (this.state.shouldRedirectToRoot) {
       // return <Redirect to={'/math/'+this.state.serverLesson.parentId}  />
     }
     // if we have not loaded yet, display spinner
@@ -460,6 +465,7 @@ class Lesson extends Component {
           }
           }>Delete</Button>
 
+        
           <Button variant="dark" onClick={() => {
             this.saveToGithub();
           }
@@ -610,9 +616,9 @@ function DeleteConfirmModal(props) {
       </Modal.Header>
       <Modal.Body>
         <p>
-          Are you sure you want to delete lesson: <br/> <span className="text-info">{props.lessonName} <br/>(id: {props.lessonId})</span><br/> and all its children?
-        <br/>
-        <span className="text-danger">This action is <b>PERMANENT</b> and will also DELETE ALL THE CHILDREN OF THIS LESSON!</span>
+          Are you sure you want to delete lesson: <br /> <span className="text-info">{props.lessonName} <br />(id: {props.lessonId})</span><br /> and all its children?
+        <br />
+          <span className="text-danger">This action is <b>PERMANENT</b> and will also DELETE ALL THE CHILDREN OF THIS LESSON!</span>
         </p>
       </Modal.Body>
 
