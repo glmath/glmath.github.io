@@ -38,6 +38,7 @@ class Lesson extends Component {
       imageUploaded: null,
       showingImageModal: false,
       uploadingImageSpinner: false,
+      showingDeleteModal: false,
 
     };
 
@@ -333,6 +334,32 @@ class Lesson extends Component {
 
   }
 
+
+  deleteLesson = () => {
+    let c = confirm("Are you 100% sure you want to delete this lesson and all its children?");
+    if(!c){
+      this.setState({showingDeleteModal: false});
+      return;
+    }
+    console.log("Deleting Lesson!");
+
+    fetch(this.props.url + "/post/delete/", {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        "SessionId": this.props.sessionId,
+      },
+      body: JSON.stringify({
+        id: this.props.id,
+      })
+    }).then(res => res.json()).then(res => {
+      logoutIfBadAuth(res);
+      location.reload(res);
+    });
+  }
+
   render() {
 
     // if we have not loaded yet, display spinner
@@ -384,7 +411,6 @@ class Lesson extends Component {
 
 
 
-
     return (
       <div>
 
@@ -403,6 +429,14 @@ class Lesson extends Component {
           isShowing={this.state.showingUploadModal}
           close={() => this.setState({ showingUploadModal: false })} />
 
+        <DeleteConfirmModal
+          isShowing={this.state.showingDeleteModal}
+          close={() => this.setState({ showingDeleteModal: false })}
+          delete={this.deleteLesson}
+          lessonId={this.state.serverLesson.id}
+          lessonName={this.state.serverLesson.name}
+        />
+
         {/* <Link to={"../browser"}>
           <Button variant="dark" >Back</Button>
         </Link> */}
@@ -416,11 +450,16 @@ class Lesson extends Component {
               This lesson has been saved, however your changes are not on the public website yet. When you are ready, Click <b>Publish</b> to publish them to the main website! (Note: that it will take a few minutes after clicking publish for this message to go away)
           </Alert> : "")}
 
+          <Button variant="danger" onClick={() => {
+            this.setState({ showingDeleteModal: true });
+          }
+          }>Delete</Button>
 
           <Button variant="dark" onClick={() => {
             this.saveToGithub();
           }
           }>Publish To Everyone</Button>
+
 
 
           <Button variant="dark" onClick={() => {
@@ -542,18 +581,46 @@ function UploadImageModal(props) {
       <Modal.Footer>
         {props.spinner ? <Spinner className="spinner spinner-sm" animation="border" role="status">
           <span className="sr-only">Loading...</span>
-        </Spinner> :<>
+        </Spinner> : <>
 
-        <Button variant="secondary" onClick={handleClose}>
-            Close
+            <Button variant="secondary" onClick={handleClose}>
+              Close
           </Button>
-        <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button></>}
+            <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button></>}
 
       </Modal.Footer>
     </Modal>
   );
 }
 
+function DeleteConfirmModal(props) {
+
+  const handleClose = () => props.close();
+
+  return (
+    <Modal show={props.isShowing} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Delete Lesson</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Are you sure you want to delete lesson: <br/> <span className="text-info">{props.lessonName} <br/>(id: {props.lessonId})</span><br/> and all its children?
+        <br/>
+        <span className="text-danger">This action is <b>PERMANENT</b> and will also DELETE ALL THE CHILDREN OF THIS LESSON!</span>
+        </p>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+          </Button>
+        <Button variant="danger" onClick={props.delete}>
+          Delete
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
 function UploadToServerModal(props) {
 
   const handleClose = () => props.close();
