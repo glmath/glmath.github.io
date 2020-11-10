@@ -277,13 +277,53 @@ function mongoSetUpDone() {
           status: "success",
         });
       }
+    });
+  });
 
+
+  app.post('/post/delete/', checkAuth, (req, res) => {
+    let id = req.body.id;
+    console.log("******* DELETING LESSON ***********");
+    console.log("LESOSN NAME and ID ", req.body.name, "  :  ", req.body.id);
+    shouldRecalculateTree = true;
+    if (req.body.id == "root") {
+      res.status(403).send({});
+      return;
+    }
+
+    lessonsCollection.findOne({ _id: id }, (err, lesson) => {
+      if (err || lesson == undefined || lesson == null) {
+        res.status(404).send({});
+        console.log("Trying to delete lesson not even made!");
+        return;
+      }
+
+      //remove lesson from old parent
+      if (lesson.parentId) {
+        lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
+          if(!oldParentLesson){
+            res.status(500);
+            return;
+          }
+
+          let children = oldParentLesson.children;
+          var index = children.indexOf(req.body.id);
+          children.splice(index, 1);
+          lessonsCollection.updateOne({ _id: lesson.parentId }, { $set: { children: children } }, { upsert: true });
+        });
+      }
+
+
+
+      let lessonWithNoParent = req.body;
+      lessonWithNoParent.parentId = "DELETED";
+      lessonsCollection.updateOne({ _id: id }, { $set: lessonWithNoParent}, { upsert: true });
+
+      res.json({
+        status: "success",
+      });
 
     });
-
-
-
-
   });
 
   app.post("/post/lesson-to-github/", checkAuth, (req, res) => {
