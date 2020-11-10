@@ -10,7 +10,7 @@ Quill.register('modules/imageResize', ImageResize);
 import 'react-quill/dist/quill.snow.css';
 import Footer from "./Footer.jsx"
 import {
-  Link
+  Link, Redirect
 } from "react-router-dom";
 
 import getVideoId from 'get-video-id';
@@ -39,6 +39,7 @@ class Lesson extends Component {
       showingImageModal: false,
       uploadingImageSpinner: false,
       showingDeleteModal: false,
+      shouldRedirectToRoot: false,
 
     };
 
@@ -356,12 +357,16 @@ class Lesson extends Component {
       })
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
-      location.reload(res);
+      // force the lesson browser to refresh with the query param
+      window.location.assign("/client/#/?shouldReload=true" + this.state.serverLesson.parentId);
     });
   }
 
   render() {
 
+    if(this.state.shouldRedirectToRoot){
+      // return <Redirect to={'/math/'+this.state.serverLesson.parentId}  />
+    }
     // if we have not loaded yet, display spinner
     if (this.state.serverLesson == null) {
       return (<>
@@ -557,6 +562,7 @@ function LessonViewer(props) {
 function logoutIfBadAuth(res) {
   if (res.status == "invalid-login") {
     cookies.set("isAdmin", "false");
+    alert("Logging you out since your session has expired! Please login again!")
     location.reload();
   }
 }

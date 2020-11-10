@@ -432,7 +432,7 @@ function LessonListing(props) {
                 {props.collapseIcon}
             </div>
 
-            <Link className={"lesson-listing-link-wrapper"} to={"/math/" + props.item.id}>
+            <Link className={"lesson-listing-link-wrapper"} to={"/" + props.item.id}>
                 <div className={"lesson-listing-name"}  >
                     <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
                 </div>

@@ -7,6 +7,7 @@ import {
   Link,
   Redirect,
   useParams,
+  useLocation,
 } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -36,6 +37,7 @@ class LMath extends Component {
       shouldShowCloseButton: true,
       closeButtonText: "Cancel",
       modalContent: "",
+      lastUpdateLessonBrowser: "",
     }
   }
   loginButtonClicked = () => {
@@ -89,6 +91,7 @@ class LMath extends Component {
   }
 
   render() {
+
     return (
       <Container fluid> {this.state.showingModal ?
         <LoginModal
@@ -107,9 +110,9 @@ class LMath extends Component {
           <Switch>
 
 
-            <Route path="/math/:id" children={
+            <Route path="/:id" children={
               <div className="lesson-page-wrapper row">
-                <LessonBrowser sessionId={this.state.sessionId} defaultCollapsed={false} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
+                <LessonBrowser lastUpdate={this.state.lastUpdateLessonBrowser} sessionId={this.state.sessionId} defaultCollapsed={false} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} className="col-3" url={this.props.url} clientUrl={this.props.clientUrl} isAdmin={this.state.isAdmin} />
                 <LessonLoader sessionId={this.state.sessionId} loginButton={this.loginButtonClicked} logoutButton={this.logoutButtonClicked} isAdmin={this.state.isAdmin} url={this.props.url} clientUrl={this.props.clientUrl} />
               </div>
             }></Route>
@@ -127,7 +130,7 @@ class LMath extends Component {
             </Route> */}
 
             <Route path="/">
-              <Redirect to="/math/root" />
+              <Redirect to="/root" />
             </Route>
 
 
@@ -143,7 +146,12 @@ class LMath extends Component {
 
 
 function LessonLoader(props) {
-  let { id } = useParams();
+  let {id, shouldReload } = useParams();
+  console.log(shouldReload);
+
+  if(shouldReload){
+    this.setState({lastUpdateLessonBrowser: Date.now()});// force the lesson browser to refresh;
+  }
 
   return (
     <div className="lesson-loader-wrapper col-9">
