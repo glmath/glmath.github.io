@@ -164,7 +164,6 @@ function LessonLoader(props) {
   let location = useLocation();
   let shouldReload = new URLSearchParams(location.search).get("shouldReload");
 
-  console.log(shouldReload);
   if(shouldReload){
     // props.reloadLessonBrowser();
     // console.log(window.location);
