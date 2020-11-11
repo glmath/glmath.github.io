@@ -20,6 +20,8 @@ import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 
 
+import {UploadToServerModal, DeleteConfirmModal, UploadImageModal } from "./Modals.jsx";
+
 class Lesson extends Component {
 
   constructor(props) {
@@ -516,19 +518,8 @@ class Lesson extends Component {
       </div>
     );
   }
-
-
-
 }
 
-
-
-function Editor(props) {
-  const [value, setValue] = useState('');
-  return (
-    <ReactQuill ref={props.eref} theme="snow" value={value} onChange={setValue} />
-  );
-}
 
 function LessonName(props) {
   return <h1><EditableText
@@ -541,32 +532,6 @@ function LessonName(props) {
   /> </h1>
 }
 
-function LessonEditor(props) {
-
-  return (<div>
-    <textarea
-      onChange={(e) => props.rawContent_set(e.target.value)}
-      type="textarea"
-      value={props.rawContent}
-      className="lesson-editor"
-    />
-  </div>)
-}
-
-
-
-function LessonViewer(props) {
-  return (<div >
-    <div className="lesson-viewer">
-      {props.rawContent}
-      <ReactMarkdown source={props.rawContent} />
-    </div>
-
-  </div>)
-}
-
-
-
 
 function logoutIfBadAuth(res) {
   if (res.status == "invalid-login") {
@@ -574,86 +539,6 @@ function logoutIfBadAuth(res) {
     alert("Logging you out since your session has expired! Please login again!")
     location.reload();
   }
-}
-function UploadImageModal(props) {
-
-  const handleClose = () => props.close();
-
-  return (
-    <Modal show={props.isShowing} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Upload Image</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-
-        <input
-          type="file"
-          onChange={(e) => props.setImageState(e.target.files[0])}
-          accept='image/*'
-        />
-      </Modal.Body>
-
-      <Modal.Footer>
-        {props.spinner ? <Spinner className="spinner spinner-sm" animation="border" role="status">
-          <span className="sr-only">Loading...</span>
-        </Spinner> : <>
-
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-          </Button>
-            <Button className="btn btn-upload-image" onClick={props.uploadImageToServer} >Upload Image</Button></>}
-
-      </Modal.Footer>
-    </Modal>
-  );
-}
-
-function DeleteConfirmModal(props) {
-
-  const handleClose = () => props.close();
-
-  return (
-    <Modal show={props.isShowing} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Delete Lesson</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>
-          Are you sure you want to delete lesson: <br /> <span className="text-info">{props.lessonName} <br />(id: {props.lessonId})</span><br /> and all its children?
-        <br />
-          <span className="text-danger">This action is <b>PERMANENT</b> and will also DELETE ALL THE CHILDREN OF THIS LESSON!</span>
-        </p>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-          </Button>
-        <Button variant="danger" onClick={props.delete}>
-          Delete
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
-}
-function UploadToServerModal(props) {
-
-  const handleClose = () => props.close();
-
-  return (
-    <Modal show={props.isShowing} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Published to everyone!</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>This lesson has been published to everyone! However it might take a few minutes to show up on the regular website.</Modal.Body>
-
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-          </Button>
-      </Modal.Footer>
-    </Modal>
-  );
 }
 
 export default Lesson;

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 
+import LessonListing from "./LessonListing.jsx"
 import {
     HashRouter,
     Switch,
@@ -13,6 +14,8 @@ import {
     withRouter,
 } from "react-router-dom";
 import Nestable from 'react-nestable';
+
+import {ChangingContentModal} from "./Modals.jsx";
 
 class LessonBrowser extends Component {
 
@@ -384,7 +387,7 @@ class LessonBrowser extends Component {
                                 this.setState({ showingUploadModal: true });
                                 this.saveToGithub();
                             }}> Publish lesson tree to main site </Button>
-                            <UploadToServerModal
+                            <ChangingContentModal
                                 closeButton={this.state.shouldModalHaveClose}
                                 content={this.state.modalContent}
                                 isShowing={this.state.showingUploadModal}
@@ -420,54 +423,6 @@ class LessonBrowser extends Component {
 }
 
 
-function LessonListing(props) {
-    // TODO: inorder to find if were selected, parse the url our self
-
-    // this is used for highlighting the selected lesson
-    const id = window.location.hash.split("/")[window.location.hash.split("/").length - 1];
-
-
-    return (
-
-        <div className={"lesson-listing-wrapper" + (id == props.item.id ? " lesson-listing-selected" : "")}>
-            <div className="list-collapse-icon">
-                {props.collapseIcon}
-            </div>
-
-            <Link className={"lesson-listing-link-wrapper"} to={"/" + props.item.id}>
-                <div className={"lesson-listing-name"}  >
-                    <span className="lesson-browser-lesson-text" key={props.item.id}>{props.item.name}</span>
-                </div>
-            </Link>
-
-        </div >
-    )
-}
-
-function UploadToServerModal({ close, isShowing, content, closeButton = true }) {
-
-    const handleClose = () => close();
-
-    return (
-        <Modal show={isShowing} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title></Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {content}
-            </Modal.Body>
-
-
-
-            <Modal.Footer>
-                {closeButton ?
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                </Button> : ""}
-            </Modal.Footer>
-        </Modal>
-    );
-}
 
 function logoutIfBadAuth(res) {
     if (res.status == "invalid-login") {
