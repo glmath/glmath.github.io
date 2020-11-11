@@ -206,5 +206,10 @@ ol.nestable-list {
   border-radius: 1px;
   cursor: pointer;
   color: lightblue;
+}
 
+@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+  img{
+    width:100%;
+  }
 }
