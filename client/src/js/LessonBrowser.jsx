@@ -221,7 +221,7 @@ class LessonBrowser extends Component {
 
 
     refreshLessonsFromServer = () => {
-        fetch(this.props.url + "/get/lesson-tree/root", {
+        fetch(this.props.url + "/get/lesson-tree/", {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

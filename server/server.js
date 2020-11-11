@@ -553,7 +553,7 @@ function mongoSetUpDone() {
     });
   });
 
-  app.get('/get/lesson-tree/:id', (req, res) => {
+  app.get('/get/lesson-tree/', (req, res) => {
 
     if (!shouldRecalculateTree) {
       res.send(JSON.stringify(cachedLessonTree));
