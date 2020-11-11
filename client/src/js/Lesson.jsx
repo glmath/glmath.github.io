@@ -474,6 +474,9 @@ class Lesson extends Component {
 
 
           <Button variant="dark" onClick={() => {
+            if(this.haveLoadedQuill){
+              this.haveLoadedQuill = false;
+            }
             this.setState({
               isEditor: !this.state.isEditor,
               startingValue: this.state.serverLesson.content,
