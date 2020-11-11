@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const fileUpload = require('express-fileupload');
 var cloudinary = require('cloudinary');
 
+const AWS = require('aws-sdk');
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
 
@@ -30,6 +31,13 @@ let shouldRecalculateTree = true; // if we moved something or renamed we should 
 
 let validSessions = [];
 
+// Initializing S3 Interface
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET,
+});
+
+// initlizing mongo db
 MongoClient.connect(uri, function (err, dbtemp) {
   if (err) {
     console.log(err);
@@ -301,7 +309,7 @@ function mongoSetUpDone() {
       //remove lesson from old parent
       if (lesson.parentId) {
         lessonsCollection.findOne({ _id: lesson.parentId }, (err, oldParentLesson) => {
-          if(!oldParentLesson){
+          if (!oldParentLesson) {
             res.status(500);
             return;
           }
@@ -317,7 +325,7 @@ function mongoSetUpDone() {
 
       let lessonWithNoParent = req.body;
       lessonWithNoParent.parentId = "DELETED";
-      lessonsCollection.updateOne({ _id: id }, { $set: lessonWithNoParent}, { upsert: true });
+      lessonsCollection.updateOne({ _id: id }, { $set: lessonWithNoParent }, { upsert: true });
 
       res.json({
         status: "success",
@@ -367,25 +375,38 @@ function mongoSetUpDone() {
         });
       } else {
         let image = req.files.image;
-        let filename = image.name + "--" + Date.now();
+        let filename = Date.now() + "--" + image.name;
 
         // image.mv('../client/images/tempI');
 
-        cloudinary.v2.uploader.upload(image.tempFilePath,
-          (error, result) => {
-            if (error) {
-              console.log(err);
-              res.status(500).send(err);
-              return;
-            }
+        // cloudinary.v2.uploader.upload(image.tempFilePath,
+        //   (error, result) => {
+        //     if (error) {
+        //       console.log(err);
+        //       res.status(500).send(err);
+        //       return;
+        //     }
 
-            res.send({
-              status: "image-uploaded",
-              url: result.secure_url,
-            });
+        //     res.send({
+        //       status: "image-uploaded",
+        //       url: result.secure_url,
+        //     });
 
-            ExecuteCommand("rm " + image.tempFilePath);
+        //     ExecuteCommand("rm " + image.tempFilePath);
+        //   });
+
+        uploadFile(image.tempFilePath, filename, (url) => {
+          if (url == null) {
+            throw "File upload failed!";
+          }
+
+          res.send({
+            status: "image-uploaded",
+            url: url,
           });
+
+          ExecuteCommand("rm " + image.tempFilePath);
+        });
       }
     } catch (err) {
       console.log(err);
@@ -393,6 +414,28 @@ function mongoSetUpDone() {
     }
   });
 
+
+
+
+  const uploadFile = (filepath, keyForStorage, callback) => {
+    const fileContent = fs.readFileSync(filepath);
+
+    // setting up s3 upload parameters
+    const params = {
+      Bucket: "glmath",
+      Key: keyForStorage, 
+      Body: fileContent,
+      ACL: 'public-read',
+    };
+
+    // Uploading files to the bucket
+    s3.upload(params, function (err, data) {
+      if (err) {
+        throw err
+      }
+      callback(data.Location);
+    });
+  };
 
   function squashLastTwoCommits() {
 
