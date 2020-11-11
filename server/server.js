@@ -367,7 +367,7 @@ function mongoSetUpDone() {
   });
 
 
-  app.post('/upload-image', checkAuth, async (req, res) => {
+  app.post('/post/upload-image', checkAuth, async (req, res) => {
     try {
       if (!req.files) {
         res.send({

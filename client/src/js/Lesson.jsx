@@ -305,7 +305,7 @@ class Lesson extends Component {
     form.append('image', image);
 
     this.setState({ uploadingImageSpinner: true });
-    fetch(this.props.url + '/upload-image', {
+    fetch(this.props.url + '/post/upload-image', {
       method: 'POST',
       credentials: 'include',
       headers: {
