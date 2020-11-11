@@ -11,8 +11,6 @@ import {
 } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Login from "./Login.jsx";
-import CreateAccount from "./CreateAccount.jsx";
 
 import Lesson from "./Lesson.jsx"
 import LessonBrowser from "./LessonBrowser.jsx"
