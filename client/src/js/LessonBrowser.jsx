@@ -472,6 +472,7 @@ function UploadToServerModal({ close, isShowing, content, closeButton = true }) 
 function logoutIfBadAuth(res) {
     if (res.status == "invalid-login") {
         cookies.set("isAdmin", "false");
+        alert("Logging you out since your session has expired! Please login again!")
         location.reload();
     }
 }
