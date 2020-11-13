@@ -16,7 +16,8 @@ function UploadImageModal(props) {
         <input
           type="file"
           onChange={(e) => props.setImageState(e.target.files[0])}
-          accept='image/*'
+        //   accept='image/*'
+        //   accept=''
         />
       </Modal.Body>
 

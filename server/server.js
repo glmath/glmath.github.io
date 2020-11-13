@@ -5,6 +5,7 @@ const { exec } = require("child_process");
 const session = require('express-session')
 const { v4: uuidv4 } = require('uuid');
 const fileUpload = require('express-fileupload');
+const path = require("path");
 var cloudinary = require('cloudinary');
 
 const AWS = require('aws-sdk');
@@ -24,6 +25,7 @@ let lessonsCollection = null;
 let uri = "mongodb+srv://nedaChatAdmin:" + process.env.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 const fs = require('fs');
 const { ListGroupItem } = require("react-bootstrap");
+let PDFImage = require("pdf-image").PDFImage;
 
 // since creating a lesson tree is expensive, memonize it to optimize
 let cachedLessonTree = {};
@@ -375,8 +377,42 @@ function mongoSetUpDone() {
         });
       } else {
         let image = req.files.image;
+        let ext = path.extname(image.name)
         let filename = Date.now() + "--" + image.name;
 
+
+        console.log(ext);
+        if (ext == ".pdf") {
+          filename = filename + ".png"; // since we are going to be converting it to a png
+
+          console.log("detecting pdf");
+          var pdfImage = new PDFImage(image.tempFilePath, {
+            combinedImage: true,
+            convertOptions: {
+              "-quality": "80", // this is all lossless, however it will increase the compression
+              "-density": "250x250",// this is the key for keeping pencil scan writing legible
+            }
+          });
+
+          pdfImage.convertFile().then(function (imagePaths) {
+            console.log("image paths are", imagePaths);
+
+            uploadFile(imagePaths, filename, (url) => {
+              if (url == null) {
+                throw "File upload failed!";
+              }
+
+              res.send({
+                status: "image-uploaded",
+                url: url,
+              });
+
+              ExecuteCommand("rm " + image.tempFilePath);
+              ExecuteCommand("rm " + imagePaths);
+            });
+          });
+          return;
+        }
         // image.mv('../client/images/tempI');
 
         // cloudinary.v2.uploader.upload(image.tempFilePath,
@@ -423,7 +459,7 @@ function mongoSetUpDone() {
     // setting up s3 upload parameters
     const params = {
       Bucket: "glmath",
-      Key: keyForStorage, 
+      Key: keyForStorage,
       Body: fileContent,
       ACL: 'public-read',
     };

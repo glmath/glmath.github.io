@@ -20,7 +20,7 @@ import Cookies from 'universal-cookie';
 const cookies = new Cookies();
 
 
-import {UploadToServerModal, DeleteConfirmModal, UploadImageModal } from "./Modals.jsx";
+import { UploadToServerModal, DeleteConfirmModal, UploadImageModal } from "./Modals.jsx";
 
 class Lesson extends Component {
 
@@ -103,6 +103,13 @@ class Lesson extends Component {
 
     customButton.addEventListener('click', () => {
 
+      let editor = this.reactQuill.current.editor;
+      var currentCaretPos = editor.getSelection();
+      if (!currentCaretPos) {
+        alert("Please Click somewhere in the text first!")
+        return;
+      }
+
       let url = prompt("Please Enter a youtube link: ");
       let ytinfo = getVideoId(url);
       if (ytinfo.service != "youtube" || ytinfo.id == null) {
@@ -111,18 +118,11 @@ class Lesson extends Component {
       }
       let videoId = ytinfo.id;
 
-      let editor = this.reactQuill.current.editor;
-
-      var currentCaretPos = editor.getSelection();
-      if (currentCaretPos) {
-        // The youtube embed code: setting the playist to video id for looping
-        // const value = `<iframe width="500" height="500" class="ytvideo-embed-iframe" src="https:/www.youtube-nocookie.com/embed/${videoId}?playlist=${videoId}&loop=1&rel=0" frameborder="0" allow="accelerometer; modestbranding; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
-        const embedCode = '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen modestbranding></iframe>'
-        // editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, value);
-        editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, embedCode);
-      } else {
-        alert("Please Click somewhere in the text first!")
-      }
+      // The youtube embed code: setting the playist to video id for looping
+      // const value = `<iframe width="500" height="500" class="ytvideo-embed-iframe" src="https:/www.youtube-nocookie.com/embed/${videoId}?playlist=${videoId}&loop=1&rel=0" frameborder="0" allow="accelerometer; modestbranding; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+      const embedCode = '<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/' + videoId + '?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen modestbranding></iframe>'
+      // editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, value);
+      editor.clipboard.dangerouslyPasteHTML(currentCaretPos.index, embedCode);
 
     });
 
@@ -138,7 +138,15 @@ class Lesson extends Component {
     var customButton = document.querySelector('.ql-image-embed');
 
 
+
     customButton.addEventListener('click', () => {
+      let editor = this.reactQuill.current.editor;
+      var currentCaretPos = editor.getSelection();
+      if(!currentCaretPos){
+        alert("Please click somewhere in the lesson first!");
+        return;
+      }
+
       this.setState({ showingImageModal: true });
     });
   }
@@ -467,7 +475,7 @@ class Lesson extends Component {
           }
           }>Delete</Button>
 
-        
+
           <Button variant="dark" onClick={() => {
             this.saveToGithub();
           }
@@ -476,7 +484,7 @@ class Lesson extends Component {
 
 
           <Button variant="dark" onClick={() => {
-            if(this.haveLoadedQuill){
+            if (this.haveLoadedQuill) {
               this.haveLoadedQuill = false;
             }
             this.setState({
