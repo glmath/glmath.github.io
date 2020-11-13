@@ -412,7 +412,6 @@ function mongoSetUpDone() {
           return;
         }
         // image.mv('../client/images/tempI');
-
         // cloudinary.v2.uploader.upload(image.tempFilePath,
         //   (error, result) => {
         //     if (error) {
