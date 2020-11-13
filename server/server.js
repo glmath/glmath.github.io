@@ -380,12 +380,10 @@ function mongoSetUpDone() {
         let ext = path.extname(image.name)
         let filename = Date.now() + "--" + image.name;
 
-
-        console.log(ext);
         if (ext == ".pdf") {
           filename = filename + ".png"; // since we are going to be converting it to a png
-
           console.log("detecting pdf");
+
           var pdfImage = new PDFImage(image.tempFilePath, {
             combinedImage: true,
             convertOptions: {
@@ -395,7 +393,7 @@ function mongoSetUpDone() {
           });
 
           pdfImage.convertFile().then(function (imagePaths) {
-            console.log("image paths are", imagePaths);
+            console.log("Uploaded pdf! path:" + imagePaths);
 
             uploadFile(imagePaths, filename, (url) => {
               if (url == null) {

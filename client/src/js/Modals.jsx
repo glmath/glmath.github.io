@@ -13,11 +13,11 @@ function UploadImageModal(props) {
       </Modal.Header>
       <Modal.Body>
 
+        <p> Select a file to upload. You may also select a pdf, however it will get converted to an image before being embedded. It will not work if there is a massive number of pages in the pdf. (Eg. No Textbooks)</p>
         <input
           type="file"
           onChange={(e) => props.setImageState(e.target.files[0])}
-        //   accept='image/*'
-        //   accept=''
+          accept='image/*,application/pdf'
         />
       </Modal.Body>
 
