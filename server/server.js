@@ -95,21 +95,7 @@ function mongoSetUpDone() {
   });
 
 
-  //   app.set('trust proxy', 1) // trust first proxy
-  //   app.use(session({
-  //     secret: 'secret',
-  //     resave: true,
-  //     // unset: 'destroy',
-  //     domain: 'glmath.github.io',
-  //     saveUninitialized: false,
-  //     cookie:  {
-  //         // path: '/',
-  //         httpOnly: false,
-  //         domain: 'glmath.github.io',
-  //         maxAge: 24 * 6 * 60 * 10000,
-  //         secure:"auto",
-  //     },
-  // })) 
+  
 
   app.listen(port, function () {
     console.log("GlMath Server Started on port " + port);
@@ -153,81 +139,6 @@ function mongoSetUpDone() {
 
     res.send(JSON.stringify({ status: "success" }));
   });
-
-  // app.post('/newUser', (req, res) => {
-  //   req.body.id = req.body.id.toLowerCase();
-  //   const salt = bcrypt.genSaltSync(saltRounds);
-  //   const hash = bcrypt.hashSync(req.body.password, salt);
-  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-  //     if (user != null || user != undefined) {
-  //       res.send("duplicate");
-  //       return;
-  //     }
-  //     usersCollection.insertOne({
-  //       _id: req.body.id,
-  //       id: req.body.id,
-  //       password: hash,
-  //       lists: {},
-  //     });
-  //     res.send("new user added");
-
-  //   });
-  // });
-  // app.post('/loginUser', (req, res) => {
-  //   req.body.id = req.body.id.toLowerCase();
-  //   res.setHeader('Content-Type', 'application/json');
-  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-  //     if (user != null) {
-  //       res.send(JSON.stringify({ correctPass: bcrypt.compareSync(req.body.password, user.password) }));
-  //     } else {
-  //       res.send(JSON.stringify({ correctPass: false }));
-  //     }
-
-  //   });
-  // });
-
-  // app.get('/getUsers', (req, res) => {
-  //   usersCollection.find({}).toArray((err, users) => {
-  //     let usersToSend = {};
-  //     users.map((user, index) => {
-  //       delete users[index].password;
-  //       usersToSend[user.id] = users[index];
-  //     });
-  //     res.setHeader('Content-Type', 'application/json');
-
-  //     res.send(JSON.stringify(usersToSend));
-  //   });
-  // });
-
-
-  // app.post('/userExists', (req, res) => {
-  //   req.body.id = req.body.id.toLowerCase();
-  //   res.setHeader('Content-Type', 'application/json');
-  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-  //     if (user == null || user == undefined || err) {
-  //       res.send(JSON.stringify({ exists: false }));
-  //       return;
-  //     }
-  //     res.send(JSON.stringify({ exists: true }));
-  //   });
-
-  // });
-
-  // app.post('/deleteUser', (req, res) => {
-  //   req.body.id = req.body.id.toLowerCase();
-  //   console.log("got remove reqest");
-  //   res.setHeader('Content-Type', 'application/json');
-  //   usersCollection.findOne({ _id: req.body.id }, (err, user) => {
-  //     if (user == null || user == undefined || err) {
-  //       res.send(JSON.stringify({}));
-  //       return;
-  //     }
-  //     usersCollection.remove({ _id: req.body.id });
-  //     console.log("removed user" + req.body.id);
-  //     res.send(JSON.stringify({}));
-  //   });
-  // });
-
 
 
   app.post('/post/lesson/', checkAuth, (req, res) => {
