@@ -12,10 +12,19 @@ This was achieved by separating the admin and user pages
 
 ### Technology Stack
 - MongoDb Atlas for the database
-- Node JS and Express server Hosted on Heroku 
+- Node JS and Express server hosted on Heroku 
 - React used for frontend app
 - Frontend hosted on github pages
 - Images stored on Amazon S3 Object Storage
+
+### Notable Features
+- Advanced and Rich lesson editor with support for latex, images, and videos
+- Live latex equation editor, allowing you to write latex in a user friendly way
+- Nested lesson tree system which intuitive drag and drop design
+- Advanced security system with Session Id's, no unauthorized api calls are possible without the proper login first
+- Image upload system with hosting on Amazon S3
+- Powerful JSON api, with support for different clients in the future
+- Automatic committing and pushing lessons to github pages for static hosting
 
 
 ### System and api diagram:
