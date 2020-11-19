@@ -24,13 +24,15 @@ class Footer extends Component {
         return (
             <div className="footer-wrapper">
                 <div className="footer-right-align">
-                    <span className="footer-text">Math Content by Pinetree Mathematics Department Head: Mr.G Lin </span>
+                    {/* <span className="footer-text">Math Content by Pinetree Mathematics Department Head: Mr.G Lin </span> */}
                     <span className="footer-text">
                         {this.props.isAdmin ?
                             <Button variant="dark" className=" btn-xs admin-login-button" onClick={() => this.props.logoutButton()}> Logout </Button> :
                             <div>
                                 <Button variant="dark" className=" btn-xs admin-login-button" onClick={() => this.props.loginButton()} > Admin Login </Button>
-                  App by <a href="https://shahan.ca" target="_blank">Shahan Neda</a>
+                                <div>
+                                    App by <a href="https://shahan.ca" target="_blank">Shahan Neda</a>
+                                </div>
                             </div>
                         }
                     </span>

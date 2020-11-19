@@ -323,8 +323,9 @@ class Lesson extends Component {
       body: form
     }).then(res => res.json()).then(res => {
       logoutIfBadAuth(res);
-      if (res.status == "failed" || res.status != "image-uploaded") {
+      if (res.status != "image-uploaded") {
         alert("Failed to upload image!!");
+        return;
       }
 
       console.log("url = ", res.url);
@@ -334,14 +335,8 @@ class Lesson extends Component {
         this.setState({ showingImageModal: false, uploadingImageSpinner: false });
 
       }
-
-
-
       console.log('res of fetch', res)
-
-
     });
-
 
   }
 
