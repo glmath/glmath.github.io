@@ -28,3 +28,6 @@ This was achieved by separating the admin and user pages
 
 ### System and API diagram:
 ![Api Diagram](https://github.com/glmath/glmath.github.io/raw/main/apiChart.png)
+
+## Video Demo
+[![video image](https://img.youtube.com/vi/f4juXCFPha4/0.jpg)](https://youtu.be/f4juXCFPha4)
