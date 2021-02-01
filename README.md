@@ -26,6 +26,5 @@ This was achieved by separating the admin and user pages
 - Powerful JSON api, with support for different clients in the future
 - Automatic committing and pushing lessons to github pages for static hosting
 
-
-### System and api diagram:
+### System and API diagram:
 ![Api Diagram](https://github.com/glmath/glmath.github.io/raw/main/apiChart.png)
