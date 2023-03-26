@@ -1,4 +1,5 @@
 const express = require("express");
+require('dotenv').config()
 const app = express();
 const port = process.env.PORT;
 const { exec } = require("child_process");
@@ -12,16 +13,14 @@ const AWS = require('aws-sdk');
 const mongo = require("mongodb");
 var MongoClient = require('mongodb').MongoClient;
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 let db = null;
 var cookieParser = require('cookie-parser')
-// let auth = require("./auth.json");
 
 let usersCollection = null;
 let lessonsCollection = null;
 // let uri = "mongodb+srv://nedaChatAdmin:" + auth.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
-// cons
 let uri = "mongodb+srv://nedaChatAdmin:" + process.env.DB_PASSWORD + "@nedacluster-7z4i0.mongodb.net/NowPlan?retryWrites=true&w=majority";
 const fs = require('fs');
 const { ListGroupItem } = require("react-bootstrap");
