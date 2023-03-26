@@ -464,8 +464,7 @@ function mongoSetUpDone() {
         // console.log(lesson);
         try {
           res.send("LESSON PARENT NOT FOUND");
-        } catch {
-
+        } catch(e) {
         }
         return;
       }
