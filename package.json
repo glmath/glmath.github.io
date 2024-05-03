@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server/server.js",
     "start-dev": "concurrently \"webpack --watch\" \"nodemon server/server.js --watch server/server.js\"",
-    "start-dev-mon": "webpack --watch && nodemon"
+    "start-dev-mon": "webpack --watch && nodemon",
+    "pm2:start": "npx pm2 start server/server.js --name glmath",
+    "pm2:stop": "npx pm2 stop glmath",
+    "pm2:restart": "npx pm2 restart glmath"
   },
   "author": "Shahan Neda",
   "license": "ISC",
