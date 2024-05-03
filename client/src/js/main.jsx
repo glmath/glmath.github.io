@@ -7,7 +7,7 @@ const wrapper = document.getElementById("container");
 ReactDOM.render(
   <div>
     <LMath
-      url="https://shahanneda.xyz/glmath"
+      url="https://glmath.shahanneda.com"
       clientUrl={"https://glmath.github.io/client"}
     />
     {/* <LMath url="" clientUrl={"https://glmath.github.io/client"} ad/> */}
